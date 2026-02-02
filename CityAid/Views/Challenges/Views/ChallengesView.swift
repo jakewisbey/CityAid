@@ -1,0 +1,717 @@
+import SwiftUI
+internal import CoreData
+
+// MARK: - ChallengesView
+struct ChallengesView: View {
+    @EnvironmentObject var user: UserData
+    var challengeManager: ChallengeManager {
+        ChallengeManager(user: user)
+    }
+
+    @State private var selectedMilestoneType: Int = 0
+    @State private var isShowingDailyPopover: Bool = false
+    @State private var isShowingWeeklyPopover: Bool = false
+    @State private var isShowingMilestonesPopover: Bool = false
+    
+    
+    @Binding public var selectedLevelCard: UUID
+    @State private var levelCardFrames: [UUID: CGRect] = [:]
+    
+    @Binding public var selectedTotalContributionCard: UUID
+    @State private var totalContributionCardFrames: [UUID: CGRect] = [:]
+
+    @State private var viewport: CGRect = .zero
+        
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
+    ) private var contributions: FetchedResults<ContributionEntity>
+    
+    var dailyProgress: (Int, Bool) {
+        challengeManager.calculateChallengeProgress(
+            .daily,
+            user.dailyChallenge.target,
+            user.dailyChallenge.contributionType, contributions
+        )
+    }
+    
+    var body: some View {
+        ZStack {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Challenges")
+                    .font(.system(size: 44, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                HStack {
+                    Text("Daily")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundStyle(.white)
+                    
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 14))
+                        .frame(width: 25, height: 25)
+                        .glassEffect(.clear.interactive())
+                        .onTapGesture {
+                            self.isShowingDailyPopover = true
+                        }
+                        .popover(
+                            isPresented: $isShowingDailyPopover, arrowEdge: .top
+                        ) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Daily Challenges")
+                                    .font(.system(size: 26, weight: .bold))
+                                Text("Daily challenges encourage you to contribution to your community at least one time a day.\n\nComplete a challenge each day to keep your daily streak!")
+                            }
+                            .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
+                            .padding()
+                            .frame(width: 340, height: 210)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        Text("⏳ \(challengeManager.calculateTimeInterval(nextReset: challengeManager.nextDailyReset()))")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundStyle(.gray.opacity(0.9))
+                    }
+                    
+                    Image(systemName: "dice")
+                        .frame(width: 40, height: 40)
+                        .glassEffect(.clear.interactive().tint(.blue))
+                        .onTapGesture {
+                            challengeManager.rerollChallenges()
+                        }
+                     
+                }
+                .frame(maxWidth: .infinity)
+                
+                HStack (alignment: .center, spacing: 15) {
+                    Image(user.dailyChallenge.iconPath)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 80, height: 80)
+                    
+                    VStack(alignment: .leading, spacing: 7) {
+                        Text("Complete")
+                            .font(.system(size: 15, weight: .semibold).italic())
+                            .foregroundStyle(Color(.gray.opacity(0.8)))
+                            
+                        Text(user.dailyChallenge.title)
+                            .font(.system(size: 20, weight: .bold))
+                        
+                        Text("\(dailyProgress.0)/\(user.dailyChallenge.target) • \(user.dailyChallenge.xp) XP")
+                            .font(.system(size: 15, weight: .semibold).italic())
+                            .foregroundStyle(Color(.gray.opacity(0.8)))
+
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(15)
+                .frame(width: 375, height: 100)
+                .background(Color.gray.opacity(0.1))
+                .background(
+                    Group {
+                        if dailyProgress.1 {
+                            LinearGradient(
+                                colors: [.green.opacity(0.3), .black],
+                                startPoint: UnitPoint(x: 0, y: 1),
+                                endPoint: UnitPoint(x: 1, y: 0)
+                            )
+                            
+                        } else {
+                            Color.gray.opacity(0.1)
+                        }
+                    }
+                )
+                .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15)))
+                Spacer()
+                
+                HStack {
+                    Text("Weekly")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundStyle(.white)
+
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 14))
+                        .frame(width: 25, height: 25)
+                        .glassEffect(.clear.interactive())
+                        .onTapGesture {
+                            self.isShowingWeeklyPopover = true
+                        }
+                        .popover(
+                            isPresented: $isShowingWeeklyPopover, arrowEdge: .top
+                        ) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Weekly Challenges")
+                                    .font(.system(size: 26, weight: .bold))
+                                Text("Weekly challenges are harder, but more rewarding than daily challenges, designed to encourage you to contribute even more to your community.\n\nTry to complete all 3 each week to earn extra xp!")
+                            }
+                            .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
+                            .padding()
+                            .frame(width: 340, height: 250)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        Text("⏳ \(challengeManager.calculateTimeInterval(nextReset: challengeManager.nextWeeklyReset()))")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundStyle(.gray.opacity(0.9))
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                HStack {
+                    ForEach(user.weeklyChallenges, id: \.id) { challenge in
+                        WeeklyChallengeCard(challenge: challenge, progress: challengeManager.calculateChallengeProgress(.weekly, challenge.target, challenge.contributionType, contributions))
+                    }
+                }
+                Spacer()
+                
+                HStack {
+                    VStack (alignment: .leading) {
+                        HStack {
+                            Text("Milestones")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundStyle(.white)
+                                .frame(alignment: .leading)
+
+                            Image(systemName: "info.circle")
+                                .font(.system(size: 14))
+                                .frame(width: 25, height: 25)
+                                .glassEffect(.clear.interactive())
+                                .onTapGesture {
+                                    self.isShowingMilestonesPopover = true
+                                }
+                                .popover(
+                                    isPresented: $isShowingMilestonesPopover, arrowEdge: .bottom
+                                ) {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Milestones")
+                                            .font(.system(size: 26, weight: .bold))
+                                        Text("Milestones are a great way to celebrate your achievements, split up into user level and total contributions.\n\nEach milestone awards you with a unique badge!")
+                                    }
+                                    .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
+                                    .padding()
+                                    .frame(width: 340, height: 210)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        }
+                        let options = ["User Level", "Contributions"]
+                        
+                        Picker("", selection: $selectedMilestoneType) {
+                            ForEach(0..<options.count, id: \.self) { index in
+                                Text(options[index]).tag(index)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .frame(maxWidth: 300)
+                        .padding(.leading, 35)
+                                            
+                        Spacer()
+                        
+                        ZStack {
+                            GeometryReader { proxy in
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack {
+                                        ForEach(levelMilestones) { milestone in
+                                            LevelMilestoneCard(id: milestone.id, milestone: milestone, title: milestone.title, caption: milestone.description, badge: milestone.badgePath, selectedLevelCard: selectedLevelCard, user: user)
+                                            }
+                                    }
+                                    .scrollTargetLayout()
+                                }
+                                .scrollTargetBehavior(.viewAligned)
+                                .coordinateSpace(name: "levelCardScroll")
+                                .overlay(
+                                    GeometryReader { scrollProxy in
+                                        Color.clear
+                                            .onAppear {
+                                                let rect = scrollProxy.frame(in: .named("levelCardScroll"))
+                                                viewport = rect
+                                            }
+                                            .onChange(of: scrollProxy.size) { _, _ in
+                                                let rect = scrollProxy.frame(in: .named("levelCardScroll"))
+                                                viewport = rect
+                                            }
+                                    }
+                                    .allowsHitTesting(false)
+                                )
+                            }
+                            .zIndex(selectedMilestoneType == 0 ? 1 : -1)
+                            .scaleEffect(selectedMilestoneType == 0 ? 1 : 0.7)
+                            .opacity(selectedMilestoneType == 0 ? 1 : 0)
+                            .animation(.spring(duration: 0.3), value: selectedMilestoneType)
+                            .padding(.top, 12)
+                            .onPreferenceChange(LevelCardFramesKey.self) { frames in
+                                levelCardFrames = frames
+                                updateSelectedLevelCardByCenter()
+                            }
+
+                            
+                            GeometryReader { proxy in
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack {
+                                        ForEach(totalContributionMilestones) { milestone in
+                                            TotalContributionMilestoneCard(id: milestone.id, milestone: milestone, title: milestone.title, caption: milestone.description, selectedTotalContributionCard: selectedTotalContributionCard, contributions: contributions)
+                                            }
+                                    }
+                                    .scrollTargetLayout()
+                                }
+                                .scrollTargetBehavior(.viewAligned)
+                                .coordinateSpace(name: "totalContributionCardScroll")
+                                .overlay(
+                                    GeometryReader { scrollProxy in
+                                        Color.clear
+                                            .onAppear {
+                                                let rect = scrollProxy.frame(in: .named("totalContributionCardScroll"))
+                                                viewport = rect
+                                            }
+                                            .onChange(of: scrollProxy.size) { _, _ in
+                                                let rect = scrollProxy.frame(in: .named("totalContributionCardScroll"))
+                                                viewport = rect
+                                            }
+                                    }
+                                    .allowsHitTesting(false)
+                                )
+                            }
+                            .zIndex(selectedMilestoneType == 0 ? -1 : 1)
+                            .scaleEffect(selectedMilestoneType == 0 ? 0.7 : 1)
+                            .opacity(selectedMilestoneType == 0 ? 0 : 1)
+                            .animation(.spring(duration: 0.3), value: selectedMilestoneType)
+                            .padding(.top, 12)
+                            .onPreferenceChange(TotalContributionCardFramesKey.self) { frames in
+                                totalContributionCardFrames = frames
+                                updateSelectedTotalContributionCardByCenter()
+                            }
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .padding(16)
+            .padding(.bottom, 150)
+            .onAppear {
+                challengeManager.handleDailyReset()
+                challengeManager.handleWeeklyReset()
+            }
+            .onReceive(
+                NotificationCenter.default.publisher(
+                    for: UIApplication.willEnterForegroundNotification
+                )
+            ) { _ in
+                challengeManager.handleDailyReset()
+                challengeManager.handleWeeklyReset()
+            }
+            .onReceive(
+                NotificationCenter.default.publisher(
+                    for: .NSCalendarDayChanged
+                )
+            ) { _ in
+                challengeManager.handleDailyReset()
+                challengeManager.handleWeeklyReset()
+            }
+        }
+    }
+    
+    private func updateSelectedLevelCardByCenter() {
+        guard !viewport.isEmpty else { return }
+        
+        let centerX = viewport.midX
+        var best: (UUID, CGFloat)? = nil
+        
+        for (id, frame) in levelCardFrames {
+            let distance = abs(frame.midX - centerX)
+            if let current = best {
+                if distance < current.1 {
+                    best = (id, distance)
+                }
+            } else {
+                best = (id, distance)
+            }
+        }
+        
+        if let best = best {
+            withAnimation(.easeInOut(duration: 0.15)) {
+                selectedLevelCard = best.0
+            }
+        }
+    }
+    
+    private func updateSelectedTotalContributionCardByCenter() {
+        guard !viewport.isEmpty else { return }
+        
+        let centerX = viewport.midX
+        var best: (UUID, CGFloat)? = nil
+        
+        for (id, frame) in totalContributionCardFrames {
+            let distance = abs(frame.midX - centerX)
+            if let current = best {
+                if distance < current.1 {
+                    best = (id, distance)
+                }
+            } else {
+                best = (id, distance)
+            }
+        }
+        
+        if let best = best {
+            withAnimation(.easeInOut(duration: 0.15)) {
+                selectedTotalContributionCard = best.0
+            }
+        }
+    }
+}
+
+struct WeeklyChallengeCard: View {
+    let challenge: Challenge
+    let progress: (Int, Bool)
+    
+    var body: some View {
+        VStack {
+            Image(challenge.iconPath)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 70, height: 70)
+            
+            Text("\(progress.0)/\(challenge.target) • \(challenge.xp) XP")
+                .font(.system(size: 15, weight: .semibold).italic())
+                .foregroundStyle(Color(.gray.opacity(0.8)))
+        }
+        .padding(15)
+        .frame(width: 120, height: 120)
+        .background(Color.gray.opacity(0.1))
+        .background(
+            Group {
+                if progress.1 {
+                    LinearGradient(
+                        colors: [.green.opacity(0.3), .black],
+                        startPoint: UnitPoint(x: 0, y: 1),
+                        endPoint: UnitPoint(x: 1, y: 0)
+                    )
+                } else {
+                    Color.gray.opacity(0.1)
+                }
+            }
+        )
+        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15)))
+    }
+}
+
+struct LevelMilestoneCard: View {
+    let id: UUID
+    let milestone: LevelMilestone
+    let title: String
+    let caption: String
+    let badge: String
+    let selectedLevelCard: UUID
+    var isSelected: Bool { selectedLevelCard == id }
+    let user: UserData
+    
+    var body: some View {
+        ZStack {
+            HStack {
+                    Image(badge)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 100, maxHeight: 100)
+                
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.system(size: 20, weight: .bold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, 5)
+                    
+                    Text(caption)
+                        .font(.system(size: 12))
+                        .italic()
+                        .foregroundStyle(Color(.secondaryLabel))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, 5)
+
+                    
+                    let completionStatus = user.level >= milestone.level ? "Completed" : "Not completed"
+
+                    HStack (spacing: 2){
+                        Text("Status: ")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color(.secondaryLabel))
+                            .padding(.leading, 5)
+                        
+                        Text(completionStatus)
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color(completionStatus == "Completed" ? .green : .red))
+                    }
+
+                }
+
+            }
+            .frame(width: 300, height: 120)
+            .fixedSize()
+        }
+        .scaleEffect(isSelected ? 1.0 : 0.8, anchor: .bottom)
+        .saturation(isSelected ? 1.0 : 0.0)
+        .animation(.spring(response: 0.35, dampingFraction: 0.8, blendDuration: 0.2), value: isSelected)
+        .reportLevelCardFrame(id, in: .named("levelCardScroll"))
+    }
+}
+
+struct TotalContributionMilestoneCard: View {
+    let id: UUID
+    let milestone: TotalContributionMilestone
+    let title: String
+    let caption: String
+    let selectedTotalContributionCard: UUID
+    var isSelected: Bool { selectedTotalContributionCard == id }
+    let contributions: FetchedResults<ContributionEntity>
+    
+    var body: some View {
+        ZStack {
+            HStack {
+                Text(String(milestone.amount))
+                    .font(.system(size: 75, weight: .bold))
+                    .foregroundStyle(LinearGradient(
+                        colors: [.black, .orange, .red, .blue, .purple, .yellow],
+                    startPoint: UnitPoint(x: 0, y: 1),
+                    endPoint: UnitPoint(x: 1, y: 0)
+                    ))
+
+                
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.system(size: 20, weight: .bold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, 5)
+                    
+                    Text(caption)
+                        .font(.system(size: 12))
+                        .italic()
+                        .foregroundStyle(Color(.secondaryLabel))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, 5)
+
+                    let completionStatus = milestone.amount <= contributions.count ? "Completed" : "Not completed"
+
+                    HStack (spacing: 2){
+                        Text("Status: ")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color(.secondaryLabel))
+                            .padding(.leading, 5)
+                        
+                        Text(completionStatus)
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color(completionStatus == "Completed" ? .green : .red))
+                    }
+
+                }
+
+            }
+            .frame(width: 300, height: 120)
+            .fixedSize()
+        }
+        .scaleEffect(isSelected ? 1.0 : 0.8, anchor: .bottom)
+        .saturation(isSelected ? 1.0 : 0.0)
+        .animation(.spring(response: 0.35, dampingFraction: 0.8, blendDuration: 0.2), value: isSelected)
+        .reportTotalContributionCardFrame(id, in: .named("totalContributionCardScroll"))
+    }
+    
+}
+
+
+
+enum ResetKey {
+    static let daily = "lastDailyReset"
+    static let weekly = "lastWeeklyReset"
+}
+
+private struct LevelCardFramesKey: PreferenceKey {
+    static var defaultValue: [UUID: CGRect] = [:]
+    static func reduce(value: inout [UUID: CGRect], nextValue: () -> [UUID: CGRect]) {
+        value.merge(nextValue(), uniquingKeysWith: { $1 })
+    }
+}
+
+private struct TotalContributionCardFramesKey: PreferenceKey {
+    static var defaultValue: [UUID: CGRect] = [:]
+    static func reduce(value: inout [UUID: CGRect], nextValue: () -> [UUID: CGRect]) {
+        value.merge(nextValue(), uniquingKeysWith: { $1 })
+    }
+}
+
+private extension View {
+    func reportLevelCardFrame(_ id: UUID, in space: CoordinateSpace) -> some View {
+        background(
+            GeometryReader { geo in
+                Color.clear
+                    .preference(key: LevelCardFramesKey.self,
+                                value: [id: geo.frame(in: space)])
+            }
+        )
+    }
+    
+    func reportTotalContributionCardFrame(_ id: UUID, in space: CoordinateSpace) -> some View {
+        background(
+            GeometryReader { geo in
+                Color.clear
+                    .preference(key: TotalContributionCardFramesKey.self,
+                                value: [id: geo.frame(in: space)])
+            }
+        )
+    }
+}
+
+// MARK: - Models
+struct Challenge: Identifiable, Codable {
+    var id = UUID()
+    let title: String
+    let type: TypeOfChallenge
+    let contributionType: TypeOfContribution?
+    let target: Int
+    let xp: Int
+    var xpRewarded: Bool = false
+    let iconPath: String
+    
+    func saveChallenges(_ challenges: [Challenge]) {
+        if let data = try? JSONEncoder().encode(challenges) {
+            UserDefaults.standard.set(data, forKey: "DynamicChallenges")
+        }
+    }
+
+    func loadChallenges() -> [Challenge] {
+        if let data = UserDefaults.standard.data(forKey: "DynamicChallenges"),
+           let decoded = try? JSONDecoder().decode([Challenge].self, from: data) {
+            return decoded
+        }
+        return []
+    }
+    
+    static func createChallenge(_ typeOfChallenge: TypeOfChallenge, _ disallowedTypes: [TypeOfContribution]? = nil, _ userSelectedTypes: [TypeOfContribution] = TypeOfContribution.allCases) -> Challenge {
+        let id = UUID()
+        var title = "Empty title"
+        let type = typeOfChallenge
+        var target = 1
+        var xp = 1
+        var iconPath = ""
+        
+        if (typeOfChallenge.rawValue == "Daily") {
+            target = 1
+            xp = Int.random(in: 3...6)
+        } else {
+            target = Int.random(in: 2...3)
+            xp = Int.random(in: 1...3) + target * 3
+        }
+                
+        // Decide whether the challenge has a type or not
+        let randomNumber = Int.random(in: 1...5)
+        if (randomNumber != 1) {
+            let baseTypes = userSelectedTypes.isEmpty ? TypeOfContribution.allCases : userSelectedTypes
+            let allowedContributionTypes = baseTypes.filter { $0 != .other && !(disallowedTypes ?? []).contains($0) }
+            let contributionType = allowedContributionTypes.randomElement()
+            
+            var firstCapital: String = ""
+            if let text = contributionType?.rawValue {
+                firstCapital = text.prefix(1).uppercased() + text.dropFirst()
+            }
+            
+            if target == 1 {
+                if (typeOfChallenge.rawValue == "Weekly") {
+                    target = Int.random(in: 7...10)
+                }
+                title = "\(target) \(firstCapital) Contribution"
+            } else {
+                title = "\(target) \(firstCapital) Contributions"
+            }
+            
+            // Select challenge icon
+            switch contributionType {
+            case .cleanliness:
+                iconPath = "CleanlinessIcon"
+            case .plantcare:
+                iconPath = "PlantcareIcon"
+            case .kindness:
+                iconPath = "KindnessIcon"
+            case .donation:
+                iconPath = "DonationIcon"
+            case .animalcare:
+                iconPath = "AnimalcareIcon"
+            default:
+                iconPath = "ErrorIcon"
+            }
+            
+            return Challenge(id: id, title: title, type: type, contributionType: contributionType, target: target, xp: xp, iconPath: iconPath)
+        }
+        else {
+            iconPath = "ContributionIcon"
+            if target == 1 {
+                title = "\(target) Contribution"
+            } else {
+                title = "\(target) Contributions"
+            }
+            
+            return Challenge(id: id, title: title, type: type, contributionType: nil, target: target, xp: xp, iconPath: iconPath)
+        }
+    }
+}
+
+enum TypeOfChallenge: String, Identifiable, Codable, CaseIterable {
+    case daily = "Daily"
+    case weekly = "Weekly"
+    case milestone = "Milestone"
+    
+    var id: String { rawValue }
+}
+
+// MARK: - Challenges and Levels
+
+struct LevelMilestone: Identifiable {
+    let id = UUID()
+    let level: Int
+    let title: String
+    let description: String
+    let badgePath: String
+}
+
+struct TotalContributionMilestone: Identifiable {
+    let id = UUID()
+    let amount: Int
+    let title: String
+    let description: String
+    let xp: Int
+}
+
+let levelMilestones: [LevelMilestone] = [
+    LevelMilestone(level: 2, title: "Baby Contributor", description: "Reach level 2", badgePath: "Bronze1Badge"),
+    LevelMilestone(level: 5, title: "Rookie Contributor", description: "Reach level 5", badgePath: "Bronze2Badge"),
+    LevelMilestone(level: 10, title: "Rising Contributor", description: "Reach level 10", badgePath: "Silver1Badge"),
+    LevelMilestone(level: 15, title: "Solid Contributor", description: "Reach level 15", badgePath: "Silver2Badge"),
+    LevelMilestone(level: 20, title: "Dedicated Contributor", description: "Reach level 20", badgePath: "Gold1Badge"),
+    LevelMilestone(level: 30, title: "Contributor Connoisseur", description: "Reach level 30", badgePath: "Gold2Badge"),
+    LevelMilestone(level: 50, title: "Legendary Contributor", description: "Reach level 50", badgePath: "Champion1Badge"),
+    LevelMilestone(level: 75, title: "Elite Contributor", description: "Reach level 75", badgePath: "Champion2Badge"),
+    LevelMilestone(level: 100, title: "Ultimate Contributor", description: "Reach level 100", badgePath: "SuperiorBadge")
+]
+
+
+
+let totalContributionMilestones: [TotalContributionMilestone] = [
+    TotalContributionMilestone(amount: 1, title: "A New Beginning", description: "Log your first contribution", xp: 2),
+    TotalContributionMilestone(amount: 5, title: "Handy Helper", description: "Log 5 contributions", xp: 5),
+    TotalContributionMilestone(amount: 10, title: "Community Cleaner", description: "Log 10 contributions", xp: 5),
+    TotalContributionMilestone(amount: 25, title: "Litter-picking Lion", description: "Log 25 contributions", xp: 5),
+    TotalContributionMilestone(amount: 50, title: "Garden Guardian", description: "Log 50 contributions", xp: 10),
+    TotalContributionMilestone(amount: 75, title: "Citywide Custodian", description: "Log 75 contributions", xp: 10),
+    TotalContributionMilestone(amount: 100, title: "Local Legend", description: "Log 100 contributions", xp: 10),
+    TotalContributionMilestone(amount: 150, title: "Urban Uplifter", description: "Log 150 contributions", xp: 15),
+    TotalContributionMilestone(amount: 200, title: "City Saviour ", description: "Log 200 contributions", xp: 15),
+]
+
+struct ChallengesView_Previews: PreviewProvider {
+    @State static var selectedLevelCard = UUID()
+    @State static var selectedTotalContributionCard = UUID()
+
+    static var previews: some View {
+        ChallengesView(selectedLevelCard: $selectedLevelCard, selectedTotalContributionCard: $selectedTotalContributionCard)
+            .environmentObject(UserData())
+    }
+}
+
