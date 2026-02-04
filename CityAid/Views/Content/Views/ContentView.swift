@@ -18,21 +18,30 @@ extension Color {
 
 // MARK: - ContentView
 struct ContentView: View {
+    // User and Contributions
+    @StateObject private var user = UserData()
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
+    ) private var contributions: FetchedResults<ContributionEntity>
+    
+    // Animation handling
     @Namespace private var buttons
     @State private var isExpanded: Bool = false
-    @State private var selectedType: TypeOfContribution? = nil
-    @State private var infoSelectedType: TypeOfContribution? = nil
-    @State private var selectedTab: Tab = .home
-    @State private var valuesTabActive: Bool = false
     @State private var backgroundMode: BackgroundMode = .none
-
+    
     @State var cardSelected: TypeOfContribution? = nil
     @State var levelCardSelected: UUID = levelMilestones.first!.id
     @State var totalContributionCardSelected: UUID = totalContributionMilestones.first!.id
     
     @State private var showStreakAnimation: Bool = false
+
+    // Selected Types
+    @State private var selectedType: TypeOfContribution? = nil
+    @State private var infoSelectedType: TypeOfContribution? = nil
     
-    @StateObject private var user = UserData()
+    // Values tab
+    @State private var selectedTab: Tab = .home
+    @State private var valuesTabActive: Bool = false
     
     var body: some View {
         ZStack {

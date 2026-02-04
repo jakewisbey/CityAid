@@ -2,16 +2,21 @@ import SwiftUI
 
 // MARK: - AccountView
 struct AccountView: View {
-    @Environment(\.colorScheme) var colorScheme
-    @State private var path = NavigationPath()
+    // User, contributions and managers
     @EnvironmentObject var user: UserData
+    // var contributions: FetchedResults<ContributionEntity>
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
+    ) private var contributions: FetchedResults<ContributionEntity>
+
+    
     var challengeManager: ChallengeManager {
         ChallengeManager(user: user)
     }
     
-    @FetchRequest(
-        sortDescriptors: []
-    ) private var contributions: FetchedResults<ContributionEntity>
+    // Other
+    @Environment(\.colorScheme) var colorScheme
+    @State private var path = NavigationPath()
 
     var body: some View {
         NavigationStack(path: $path) {

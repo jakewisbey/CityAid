@@ -10,6 +10,8 @@ struct LevelMilestoneCard: View {
     var isSelected: Bool { selectedLevelCard == id }
     let user: UserData
     
+    @State private var isTapped: Bool = false
+    
     var body: some View {
         ZStack {
             HStack {
@@ -17,6 +19,18 @@ struct LevelMilestoneCard: View {
                         .resizable()
                         .scaledToFit()
                         .frame(maxWidth: 100, maxHeight: 100)
+                        .scaleEffect(isTapped ? 1.2 : 1)
+                        .animation(.interpolatingSpring(stiffness: 150, damping: 10), value: isTapped)
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                    .onChanged { _ in
+                                        if !isTapped { isTapped = true }
+                                    }
+                                    .onEnded { _ in
+                                        isTapped = false
+                                    }
+                            )
+
                 
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -24,6 +38,8 @@ struct LevelMilestoneCard: View {
                         .font(.system(size: 20, weight: .bold))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 5)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
                     
                     Text(caption)
                         .font(.system(size: 12))

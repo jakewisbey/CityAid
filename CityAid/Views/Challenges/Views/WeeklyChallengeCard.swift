@@ -4,12 +4,25 @@ struct WeeklyChallengeCard: View {
     let challenge: Challenge
     let progress: (Int, Bool)
     
+    @State private var isTapped: Bool = false
+    
     var body: some View {
         VStack {
             Image(challenge.iconPath)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 70, height: 70)
+                .scaleEffect(isTapped ? 1.2 : 1)
+                .animation(.interpolatingSpring(stiffness: 150, damping: 10), value: isTapped)
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                            .onChanged { _ in
+                                if !isTapped { isTapped = true }
+                            }
+                            .onEnded { _ in
+                                isTapped = false
+                            }
+                    )
             
             Text("\(progress.0)/\(challenge.target) • \(challenge.xp) XP")
                 .font(.system(size: 15, weight: .semibold).italic())

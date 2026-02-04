@@ -3,8 +3,6 @@ import PhotosUI
 internal import CoreData
 
 class ContributionManager {
-    @Environment(\.dismiss) private var dismiss
-
     var context: NSManagedObjectContext
     var user: UserData
     
@@ -55,7 +53,6 @@ class ContributionManager {
         
         user.xp += randomXp
         try? context.save()
-        dismiss()
     }
 
 }

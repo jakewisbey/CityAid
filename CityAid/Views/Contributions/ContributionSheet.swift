@@ -5,6 +5,7 @@ import PhotosUI
 struct NewContributionSheet: View {
     var type: TypeOfContribution
     @State private var selectedType: TypeOfContribution
+    @Environment(\.dismiss) private var dismiss
     
     @Environment(\.managedObjectContext) private var context
     let user: UserData
@@ -169,6 +170,7 @@ struct NewContributionSheet: View {
                     
                     Button("Save Contribution") {
                         contributionManager.saveContribution(contributionTitle: contributionTitle, contributionDate: contributionDate, selectedType: selectedType, contributionNotes: contributionNotes)
+                        dismiss()
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
                     .buttonStyle(GlassButtonStyle())

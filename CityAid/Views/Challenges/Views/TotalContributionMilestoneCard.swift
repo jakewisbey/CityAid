@@ -9,16 +9,30 @@ struct TotalContributionMilestoneCard: View {
     var isSelected: Bool { selectedTotalContributionCard == id }
     let contributions: FetchedResults<ContributionEntity>
     
+    @State private var isTapped: Bool = false
+    
     var body: some View {
         ZStack {
             HStack {
                 Text(String(milestone.amount))
-                    .font(.system(size: 75, weight: .bold))
+                    .font(.system(size: 70, weight: .bold))
                     .foregroundStyle(LinearGradient(
                         colors: [.black, .orange, .red, .blue, .purple, .yellow],
                     startPoint: UnitPoint(x: 0, y: 1),
                     endPoint: UnitPoint(x: 1, y: 0)
                     ))
+                    .scaleEffect(isTapped ? 1.2 : 1)
+                    .animation(.interpolatingSpring(stiffness: 150, damping: 10), value: isTapped)
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                                .onChanged { _ in
+                                    if !isTapped { isTapped = true }
+                                }
+                                .onEnded { _ in
+                                    isTapped = false
+                                }
+                        )
+
 
                 
                 VStack(alignment: .leading, spacing: 3) {
@@ -26,6 +40,8 @@ struct TotalContributionMilestoneCard: View {
                         .font(.system(size: 20, weight: .bold))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 5)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
                     
                     Text(caption)
                         .font(.system(size: 12))

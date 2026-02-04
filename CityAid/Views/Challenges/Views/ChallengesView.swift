@@ -1,31 +1,41 @@
 import SwiftUI
 internal import CoreData
+import Combine
 
 // MARK: - ChallengesView
 struct ChallengesView: View {
+    // User, contributions and managers
     @EnvironmentObject var user: UserData
+    //var contributions: FetchedResults<ContributionEntity>
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
+    ) private var contributions: FetchedResults<ContributionEntity>
+
     var challengeManager: ChallengeManager {
         ChallengeManager(user: user)
     }
-
-    @State private var selectedMilestoneType: Int = 0
+    
+    // Popovers
     @State private var isShowingDailyPopover: Bool = false
     @State private var isShowingWeeklyPopover: Bool = false
     @State private var isShowingMilestonesPopover: Bool = false
     
-    
+    // Animation handling
+    @State private var viewport: CGRect = .zero
+    @State private var isTapped: Bool = false
+    @State private var pulse1: Bool = false
+    @State private var pulse2: Bool = true
+    let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
+
     @Binding public var selectedLevelCard: UUID
     @State private var levelCardFrames: [UUID: CGRect] = [:]
     
     @Binding public var selectedTotalContributionCard: UUID
     @State private var totalContributionCardFrames: [UUID: CGRect] = [:]
 
-    @State private var viewport: CGRect = .zero
-        
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
-    ) private var contributions: FetchedResults<ContributionEntity>
+    @State private var selectedMilestoneType: Int = 0
     
+    // Stop compiler from complaining my statements are too long
     var dailyProgress: (Int, Bool) {
         challengeManager.calculateChallengeProgress(
             .daily,
@@ -68,11 +78,27 @@ struct ChallengesView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    TimelineView(.periodic(from: .now, by: 1)) { context in
-                        Text("⏳ \(challengeManager.calculateTimeInterval(nextReset: challengeManager.nextDailyReset()))")
+                        Text("⏳")
                             .font(.system(size: 14, weight: .regular))
-                            .foregroundStyle(.gray.opacity(0.9))
-                    }
+                            .scaleEffect(pulse1 ? 1.1 : 1)
+                            .animation(.interpolatingSpring(stiffness: 150, damping: 10), value: pulse1)
+                            .padding(.trailing, -5)
+                            .onReceive(timer) { _ in
+                                withAnimation {
+                                    pulse1 = true
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    withAnimation {
+                                        pulse1 = false
+                                    }
+                                }
+                            }
+                    
+                    
+                    Text((challengeManager.calculateTimeInterval(nextReset: challengeManager.nextDailyReset())))
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundStyle(.gray.opacity(0.9))
+
                     
                     Image(systemName: "dice")
                         .frame(width: 40, height: 40)
@@ -80,6 +106,7 @@ struct ChallengesView: View {
                         .onTapGesture {
                             challengeManager.rerollChallenges()
                         }
+                        
                      
                 }
                 .frame(maxWidth: .infinity)
@@ -89,6 +116,18 @@ struct ChallengesView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 80, height: 80)
+                        .scaleEffect(isTapped ? 1.2 : 1)
+                        .animation(.interpolatingSpring(stiffness: 150, damping: 10), value: isTapped)
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                    .onChanged { _ in
+                                        if !isTapped { isTapped = true }
+                                    }
+                                    .onEnded { _ in
+                                        isTapped = false
+                                    }
+                            )
+
                     
                     VStack(alignment: .leading, spacing: 7) {
                         Text("Complete")
@@ -97,7 +136,8 @@ struct ChallengesView: View {
                             
                         Text(user.dailyChallenge.title)
                             .font(.system(size: 20, weight: .bold))
-                        
+                            .minimumScaleFactor(0.9)
+                                                    
                         Text("\(dailyProgress.0)/\(user.dailyChallenge.target) • \(user.dailyChallenge.xp) XP")
                             .font(.system(size: 15, weight: .semibold).italic())
                             .foregroundStyle(Color(.gray.opacity(0.8)))
@@ -151,12 +191,28 @@ struct ChallengesView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                    
-                    TimelineView(.periodic(from: .now, by: 1)) { context in
-                        Text("⏳ \(challengeManager.calculateTimeInterval(nextReset: challengeManager.nextWeeklyReset()))")
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundStyle(.gray.opacity(0.9))
-                    }
+                    Text("⏳")
+                        .font(.system(size: 14, weight: .regular))
+                        .scaleEffect(pulse2 ? 1.1 : 1)
+                        .animation(.interpolatingSpring(stiffness: 150, damping: 10), value: pulse2)
+                        .padding(.trailing, -5)
+                        .onReceive(timer) { _ in
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                withAnimation {
+                                    pulse2 = true
+                                }
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation {
+                                    pulse2 = false
+                                }
+                            }
+                        }
+
+                    Text(challengeManager.calculateTimeInterval(nextReset: challengeManager.nextWeeklyReset()))
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundStyle(.gray.opacity(0.9))
+
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
@@ -212,6 +268,8 @@ struct ChallengesView: View {
                         
                         ZStack {
                             GeometryReader { proxy in
+                                let horizontalPadding = max((proxy.size.width - 200) / 2, 0)
+
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack {
                                         ForEach(levelMilestones) { milestone in
@@ -219,6 +277,7 @@ struct ChallengesView: View {
                                             }
                                     }
                                     .scrollTargetLayout()
+                                    .padding(.trailing, horizontalPadding)
                                 }
                                 .scrollTargetBehavior(.viewAligned)
                                 .coordinateSpace(name: "levelCardScroll")
@@ -249,6 +308,8 @@ struct ChallengesView: View {
 
                             
                             GeometryReader { proxy in
+                                let horizontalPadding = max((proxy.size.width - 200) / 2, 0)
+
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack {
                                         ForEach(totalContributionMilestones) { milestone in
@@ -256,6 +317,7 @@ struct ChallengesView: View {
                                             }
                                     }
                                     .scrollTargetLayout()
+                                    .padding(.trailing, horizontalPadding)
                                 }
                                 .scrollTargetBehavior(.viewAligned)
                                 .coordinateSpace(name: "totalContributionCardScroll")
