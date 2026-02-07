@@ -27,16 +27,12 @@ struct ContributionBubble: View {
             .onTapGesture {
                 isExpanded = false
                 selectedType = typeOfContribution
+                backgroundMode = .sheet
             }
             .offset(x: isExpanded ? xCoord : 0,
                     y: isExpanded ? yCoord : 0)
             
             .animation(.interpolatingSpring(stiffness: 190, damping: 22) .delay(TimeInterval(delay)), value: isExpanded
             )
-            .onTapGesture {
-                isExpanded = false
-                backgroundMode = .sheet
-                selectedType = typeOfContribution
-            }
     }
 }

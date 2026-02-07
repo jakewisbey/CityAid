@@ -3,6 +3,8 @@ import SwiftUI
 // MARK: - ValuesView
 struct ValuesView: View {
     @Binding public var cardSelected: TypeOfContribution?
+    @Binding public var infoSelectedType: TypeOfContribution?
+    @Binding public var backgroundMode: BackgroundMode
     @State private var cardFrames: [TypeOfContribution: CGRect] = [:]
     @State private var viewport: CGRect = .zero
     
@@ -41,6 +43,7 @@ struct ValuesView: View {
                             HStack (spacing: 20) {
                                 
                                 InfoCard(
+                                    infoSelectedType: $infoSelectedType, backgroundMode: $backgroundMode,
                                     imageAddress: "CleanlinessCardBg",
                                     title: "Cleanliness",
                                     caption: "Clean our streets of litter and pollution.",
@@ -49,6 +52,8 @@ struct ValuesView: View {
                                 )
                                 
                                 InfoCard(
+                                    infoSelectedType: $infoSelectedType,
+                                    backgroundMode: $backgroundMode,
                                     imageAddress: "PlantcareCardBg",
                                     title: "Plant Care",
                                     caption: "Restore green spaces to help your city breathe.",
@@ -57,6 +62,7 @@ struct ValuesView: View {
                                 )
                                 
                                 InfoCard(
+                                    infoSelectedType: $infoSelectedType, backgroundMode: $backgroundMode,
                                     imageAddress: "KindnessCardBg",
                                     title: "Kindness",
                                     caption: "Make people in your city feel loved and valued.",
@@ -65,6 +71,7 @@ struct ValuesView: View {
                                 )
                                 
                                 InfoCard(
+                                    infoSelectedType: $infoSelectedType, backgroundMode: $backgroundMode,
                                     imageAddress: "DonationCardBg",
                                     title: "Donation",
                                     caption: "Donate to help those in need, or as a token of appreciation.",
@@ -73,6 +80,7 @@ struct ValuesView: View {
                                 )
                                 
                                 InfoCard(
+                                    infoSelectedType: $infoSelectedType, backgroundMode: $backgroundMode,
                                     imageAddress: "AnimalcareCardBg",
                                     title: "Animal Care",
                                     caption: "Take care of animals in your city to help them thrive.",
@@ -110,6 +118,8 @@ struct ValuesView: View {
             }
             .padding(16)
         }
+        
+
 
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .ignoresSafeArea()
@@ -168,5 +178,5 @@ struct ThickDivider: View {
 }
 
 #Preview {
-    ValuesView(cardSelected: .constant(nil))
+    ValuesView(cardSelected: .constant(nil), infoSelectedType: .constant(nil), backgroundMode: .constant(.none))
 }

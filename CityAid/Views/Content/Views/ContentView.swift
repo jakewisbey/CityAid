@@ -37,7 +37,7 @@ struct ContentView: View {
 
     // Selected Types
     @State private var selectedType: TypeOfContribution? = nil
-    @State private var infoSelectedType: TypeOfContribution? = nil
+    @State public var infoSelectedType: TypeOfContribution? = nil
     
     // Values tab
     @State private var selectedTab: Tab = .home
@@ -52,7 +52,7 @@ struct ContentView: View {
                 ChallengesView(selectedLevelCard: $levelCardSelected, selectedTotalContributionCard: $totalContributionCardSelected)
                     .tabItem { Label("Challenges", systemImage: "crown") }
                     .tag(Tab.challenges)
-                ValuesView(cardSelected: $cardSelected)
+                ValuesView(cardSelected: $cardSelected, infoSelectedType: $infoSelectedType, backgroundMode: $backgroundMode)
                     .tabItem { Label("Values", systemImage: "star") }
                     .tag(Tab.values)
                 AccountView()
@@ -82,9 +82,6 @@ struct ContentView: View {
             LinearGradient(colors: [Color(red: 0/255, green: 0/255, blue: 30/255), .black.opacity(0.3)], startPoint: .top, endPoint: .center)
                 .opacity(backgroundMode == .sheet ? 1 : 0)
                 .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation(.spring()) { isExpanded = false }
-                }
                 .animation(.easeOut(duration: 0.45), value: backgroundMode)
 
             
@@ -199,11 +196,11 @@ struct ContentView: View {
             .padding(.bottom, 75)
             .ignoresSafeArea(.keyboard)
             
-            .sheet(item: $infoSelectedType, onDismiss: { backgroundMode = .none }) { type in
+            .sheet(item: $infoSelectedType, onDismiss: { DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { backgroundMode = .none } }) { type in
                 InfoSheet(type: type)
                 .navigationTransition(.zoom(sourceID: "transition-id", in: buttons))
             }
-            .sheet(item: $selectedType, onDismiss: { backgroundMode = .none }) { type in
+            .sheet(item: $selectedType, onDismiss: { DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { backgroundMode = .none } } ) { type in
                 NewContributionSheet(type: type, user: user)
                 .navigationTransition(.zoom(sourceID: "transition-id", in: buttons))
                 .onDisappear {
@@ -211,7 +208,6 @@ struct ContentView: View {
                         showStreakAnimation = true
                         user.playedStreakAnimation = true
                     }
-                    
                     user.CalculateUserLevel()
                 }
             }
@@ -248,4 +244,3 @@ enum BackgroundMode {
 #Preview {
     ContentView()
 }
-

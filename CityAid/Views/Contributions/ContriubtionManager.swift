@@ -40,10 +40,23 @@ class ContributionManager {
     func saveContribution(contributionTitle: String, contributionDate: Date, selectedType: TypeOfContribution, contributionNotes: String) {
         let entity = ContributionEntity(context: context)
         entity.id = UUID()
-        entity.title = contributionTitle
+        
+        
+        if contributionTitle.isEmpty {
+            entity.title = "Unnamed Contribution"
+        } else {
+            entity.title = contributionTitle
+        }
+        
         entity.date = contributionDate
         entity.type = selectedType.rawValue
-        entity.notes = contributionNotes
+        
+        if contributionNotes.isEmpty {
+            entity.notes = "No notes"
+        } else {
+            entity.notes = contributionNotes
+        }
+        
         let randomXp = Int.random(in: 4...8)
         
         if !user.isStreakCompletedToday {

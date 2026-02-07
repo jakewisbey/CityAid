@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct InfoCard: View {
+    @Binding public var infoSelectedType: TypeOfContribution?
+    @Binding public var backgroundMode: BackgroundMode
     let imageAddress: String
     let title: String
     let caption: String
@@ -27,8 +29,15 @@ struct InfoCard: View {
                             endPoint: .bottom
                         )
                     )
+                    .onTapGesture() {
+                        if isSelected { infoSelectedType = cardSelected }
+                            backgroundMode = .expanded
+                    }
             }
             .cornerRadius(20)
+            .onTapGesture() {
+                if isSelected { infoSelectedType = cardSelected }
+            }
             
             ZStack() {
                 Image(systemName: "info.circle")
@@ -45,6 +54,7 @@ struct InfoCard: View {
                             .padding(15)
                             .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
                     }
+                    .contentShape(Rectangle())
             }
             .offset(x: 80, y: -130)
 
@@ -63,6 +73,10 @@ struct InfoCard: View {
                     .foregroundStyle(Color(.secondaryLabel))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 5)
+            }
+            .onTapGesture() {
+                if isSelected { infoSelectedType = cardSelected }
+                    backgroundMode = .expanded
             }
             .padding(.top, 225)
         }

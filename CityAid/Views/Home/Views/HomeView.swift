@@ -35,7 +35,7 @@ struct HomeView: View{
                             .opacity(0.6)
 
                         ForEach(contributions) { item in
-                            ContributionRow(item: item)
+                            ContributionRow(user: user, item: item)
                         }
                     }
                     .padding(16)
@@ -55,6 +55,7 @@ struct HomeView: View{
 
 struct ContributionRow: View, Identifiable {
     let id = UUID()
+    let user: UserData
     var item: ContributionEntity
     @Environment(\.managedObjectContext) private var context
 
@@ -77,14 +78,14 @@ struct ContributionRow: View, Identifiable {
                 Menu() {
                     Button {
                         // Use today's date
-                        DuplicateContribution(contribution: item, duplicateDate: false)
+                        DuplicateContribution(contribution: item, duplicateDate: false, user: user)
                     } label: {
                         Label("Use today's date", systemImage: "calendar")
                     }
 
                     Button {
                         // Keep the original contribution date
-                        DuplicateContribution(contribution: item, duplicateDate: true)
+                        DuplicateContribution(contribution: item, duplicateDate: true, user: user)
                     } label: {
                         Label("Keep original date", systemImage: "calendar.badge.clock")
                     }
@@ -104,7 +105,7 @@ struct ContributionRow: View, Identifiable {
         }
     }
     
-    func DuplicateContribution(contribution: ContributionEntity, duplicateDate: Bool) {
+    func DuplicateContribution(contribution: ContributionEntity, duplicateDate: Bool, user: UserData) {
         let duplicateContribution = ContributionEntity(context: context)
         duplicateContribution.title = contribution.title
         duplicateContribution.type = contribution.type
@@ -114,6 +115,9 @@ struct ContributionRow: View, Identifiable {
         } else {
             duplicateContribution.date = Date()
         }
+        
+        let randomXP = Int.random(in: 3...6)
+        user.xp += randomXP
         
         try? context.save()
     }

@@ -4,6 +4,7 @@ import PhotosUI
 
 struct NewContributionSheet: View {
     var type: TypeOfContribution
+    @Namespace private var pickerNamespace
     @State private var selectedType: TypeOfContribution
     @Environment(\.dismiss) private var dismiss
     
@@ -27,6 +28,10 @@ struct NewContributionSheet: View {
     @State private var contributionNotes: String = ""
     @State private var selectedItems: [PhotosPickerItem] = []
     
+    // Animation handling
+    @State private var tappedPhotoID: String? = nil
+    @State private var photoViewerImage: UIImage? = nil
+    
     
     var body: some View {
         ZStack {
@@ -41,9 +46,13 @@ struct NewContributionSheet: View {
                             .focused($isTitleFocused)
                             .lineLimit(nil)
                         
-                        Image(systemName: "pencil")
+                        Image(systemName: contributionTitle.isEmpty ? "pencil" : "xmark")
                             .font(.system(size: 20))
                             .foregroundColor(.white)
+                            .contentTransition(.symbolEffect(.replace))
+                            .onTapGesture {
+                                contributionTitle = ""
+                            }
                     }
                     
                     HStack(spacing: 2) {
@@ -107,48 +116,24 @@ struct NewContributionSheet: View {
                     Text("Photos & Videos")
                         .font(.system(size: 24).bold())
                     
-                    ScrollView(.horizontal, showsIndicators: true) {
-                        HStack(spacing: 10) {
-                            ForEach(contributionMedia.indices, id: \.self) { index in
-                                ZStack(alignment: .topTrailing) {
-                                    let media = contributionMedia[index]
-                                    switch media {
-                                    case .photo(let image):
-                                        Image(uiImage: image)
-                                            .resizable()
-                                            .frame(width: 100, height: 100)
-                                            .cornerRadius(15)
-                                    case .video(_):
-                                        Image(systemName: "play.rectangle.fill")
-                                            .resizable()
-                                            .frame(width: 100, height: 100)
-                                    }
-                                }
-                            }
-                            
-                            PhotosPicker(
-                                selection: $selectedItems,
-                                matching: .any(of: [.images, .videos])
-                            ) {
-                                Image(systemName: "plus")
-                                    .font(.system(size: 36, weight: .bold))
-                                    .frame(width: 100, height: 100)
-                                    .background(.gray.opacity(0.1))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(.white.opacity(0.1))
-                                    )
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                            }
-                        }
-                    }
-                    .onChange(of: selectedItems) { oldItems, newItems in
+                    MediaPickerRow(contributionMedia: $contributionMedia, selectedItems: $selectedItems, onImageTap: { index, image in photoViewerImage = image; tappedPhotoID = "photo-\(index)" }, pickerNamespace: pickerNamespace)
+                        .onChange(of: selectedItems) { oldItems, newItems in
                         contributionMedia.removeAll()
                         
                         for item in newItems {
                             contributionManager.handlePickerItem(item: item, contributionMedia: $contributionMedia)
                         }
                     }
+                    .sheet(isPresented: Binding(
+                        get: { photoViewerImage != nil },
+                        set: { if !$0 { photoViewerImage = nil; tappedPhotoID = nil } }
+                    )) {
+                        if let image = photoViewerImage, let sourceID = tappedPhotoID {
+                            PhotoViewer(image: image)
+                                .navigationTransition(.zoom(sourceID: sourceID, in: pickerNamespace))
+                        }
+                    }
+                    
                     
                     
                     Text("Notes")
@@ -206,13 +191,51 @@ struct NewContributionSheet: View {
     }
 }
 
-struct Contribution {
-    var id = UUID()
-    var type : TypeOfContribution
-    var title : String
-    var date: Date
-    var media: [MediaItem]
-    var notes: String?
+struct MediaPickerRow: View {
+    @Binding var contributionMedia: [MediaItem]
+    @Binding var selectedItems: [PhotosPickerItem]
+    var onImageTap: (Int, UIImage) -> Void
+    var pickerNamespace: Namespace.ID
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: true) {
+            HStack(spacing: 10) {
+                ForEach(contributionMedia.indices, id: \.self) { index in
+                    let media = contributionMedia[index]
+                    switch media {
+                    case .photo(let image):
+                        Image(uiImage: image)
+                            .resizable()
+                            .frame(width: 100, height: 100)
+                            .cornerRadius(15)
+                            .matchedTransitionSource(id: "photo-\(index)", in: pickerNamespace)
+                            .onTapGesture {
+                                onImageTap(index, image)
+                            }
+                    case .video(_):
+                        Image(systemName: "play.rectangle.fill")
+                            .resizable()
+                            .frame(width: 100, height: 100)
+                    }
+                }
+
+                PhotosPicker(
+                    selection: $selectedItems,
+                    matching: .any(of: [.images, .videos])
+                ) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 36, weight: .bold))
+                        .frame(width: 100, height: 100)
+                        .background(.gray.opacity(0.1))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(.white.opacity(0.1))
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+            }
+        }
+    }
 }
 
 enum TypeOfContribution: String, Identifiable, Codable, CaseIterable{
@@ -231,28 +254,98 @@ enum MediaItem {
     case video(URL)
 }
 
+struct PhotoViewer: View {
+    @Environment(\.dismiss) private var dismiss
+    let image: UIImage
+    
+    var body: some View {
+        ZStack {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .scaleEffect(x: 1, y: 3, anchor: .center)
+                .clipped()
+                .blur(radius: 30)
+                .overlay(Color.black.opacity(0.8))
+                .ignoresSafeArea()
+            
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .cornerRadius(10)
+                .shadow(radius: 10)
+                .onTapGesture {
+                    dismiss()
+                }
+                
+            
+            
+            VStack {
+                HStack {
+                    Spacer()
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.opacity(0.9))
+                        .frame(width: 45, height: 45)
+                        .glassEffect(.clear.interactive().tint(.blue))
+                        .padding(5)
+                        .onTapGesture {
+                            dismiss()
+                        }
+                }
+                .padding()
 
-final class PreviewPersistenceController {
-    static let shared = PreviewPersistenceController()
-    let container: NSPersistentContainer
-    init() {
-        container = NSPersistentContainer(name: "CityAid")
-        let description = NSPersistentStoreDescription()
-        description.type = NSInMemoryStoreType
-        container.persistentStoreDescriptions = [description]
-        container.loadPersistentStores { _, error in
-            if let error = error {
-                fatalError("Failed to load in-memory store: \(error)")
+                Spacer()
+
+                HStack {
+                    Spacer()
+                    Text("Tap to dismiss")
+                        .font(.system(size: 16).italic())
+                        .foregroundStyle(Color.gray.opacity(0.7))
+                    Spacer()
+                }
+                .padding()
             }
+
         }
     }
-    var context: NSManagedObjectContext { container.viewContext }
 }
 
-#Preview {
-    let user = UserData()
-    let previewContext = PreviewPersistenceController.shared.context
-    
-    return NewContributionSheet(type: .cleanliness, user: user)
-        .environment(\.managedObjectContext, previewContext)
+
+
+
+
+
+extension UIImage {
+    var averageColor: UIColor? {
+        guard let inputImage = CIImage(image: self) else { return nil }
+        let extentVector = CIVector(x: inputImage.extent.origin.x, y: inputImage.extent.origin.y, z: inputImage.extent.size.width, w: inputImage.extent.size.height)
+
+        guard let filter = CIFilter(name: "CIAreaAverage", parameters: [kCIInputImageKey: inputImage, kCIInputExtentKey: extentVector]) else { return nil }
+        guard let outputImage = filter.outputImage else { return nil }
+
+        var bitmap = [UInt8](repeating: 0, count: 4)
+        let context = CIContext(options: [.workingColorSpace: kCFNull])
+        context.render(outputImage, toBitmap: &bitmap, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1), format: .RGBA8, colorSpace: nil)
+
+        return UIColor(red: CGFloat(bitmap[0]) / 255, green: CGFloat(bitmap[1]) / 255, blue: CGFloat(bitmap[2]) / 255, alpha: CGFloat(bitmap[3]) / 255)
+    }
 }
+
+
+#Preview("NewContributionSheet") {
+    // In-memory Core Data stack for previews
+    let container = NSPersistentContainer(name: "CityAidModel")
+    let description = NSPersistentStoreDescription()
+    description.type = NSInMemoryStoreType
+    container.persistentStoreDescriptions = [description]
+    container.loadPersistentStores { _, _ in }
+    let context = container.viewContext
+
+    return NewContributionSheet(type: .cleanliness, user: UserData())
+        .environment(\.managedObjectContext, context)
+        .preferredColorScheme(.dark)
+}
+
+
