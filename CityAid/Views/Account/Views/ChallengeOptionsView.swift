@@ -11,7 +11,7 @@ struct ChallengeOptionsView: View {
                 header: Text("Allowed Types")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white.opacity(0.5)),
-                footer: Text("Select which contribution types you would like to include for possible contribution types in challenges. This ensures challenges are more relevant to you, but always try to push yourself to do more!")
+                footer: Text("Select which contribution types you would like to include for possible contribution types in challenges. This ensures challenges are more relevant to you, but always try to push yourself to do more!\n\nChallenges will update at the next reset.")
             ) {
                 ForEach(contributionTypes, id: \.self) { type in
                     Toggle(type.rawValue.capitalized, isOn: Binding<Bool>(

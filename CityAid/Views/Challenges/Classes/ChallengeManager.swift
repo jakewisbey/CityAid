@@ -110,7 +110,7 @@ class ChallengeManager {
             let count = acceptedContributions.count
             let isCompleted = count >= target
 
-            return (count, count >= target)
+            return (count, isCompleted)
             
         case .milestone:
             return (0, false)
@@ -126,10 +126,10 @@ class ChallengeManager {
         ) as? Date ?? .distantPast
         
         if !cal.isDate(lastReset, inSameDayAs: now) {
-            let todayStart = cal.startOfDay(for: now)
-            let yesterday = cal.date(byAdding: .day, value: -1, to: todayStart)!
             rerollDailyChallenge()
             UserDefaults.standard.set(now, forKey: ResetKey.daily)
+            
+            if (!user.isStreakCompletedToday) { user.streak = 0 }
             
             user.isStreakCompletedToday = false
             user.playedStreakAnimation = false
@@ -148,7 +148,7 @@ class ChallengeManager {
         let thisWeek = cal.component(.weekOfYear, from: now)
         
         if lastWeek != thisWeek {
-            for challenge in user.weeklyChallenges {
+            for _ in user.weeklyChallenges {
                 // Evaluate the previous week by passing a date from last week
                 let thisMonday = cal.nextDate(
                     after: now,
@@ -156,10 +156,9 @@ class ChallengeManager {
                     matchingPolicy: .nextTime,
                     direction: .backward
                 )!
-                let lastWeekDate = cal.date(byAdding: .day, value: -1, to: thisMonday)!
             }
             
-            rerollChallenges()
+            rerollWeeklyChallenges()
             UserDefaults.standard.set(now, forKey: ResetKey.weekly)
         }
     }

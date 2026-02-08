@@ -17,6 +17,9 @@ struct AccountView: View {
     // Other
     @Environment(\.colorScheme) var colorScheme
     @State private var path = NavigationPath()
+    @State private var showingStreakInfo = false;
+    @State private var streakText = ""
+
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -88,14 +91,14 @@ struct AccountView: View {
                     HStack {
                         Text("Streak:")
                         Spacer()
-                        if user.streak == 0 {
-                            Text(String(user.streak) + " days")
-                                .frame(alignment: .trailing)
-                        } else {
-                            Text(String(user.streak) + " days")
-                                .frame(alignment: .trailing)
-                            Text("🔥")
-                        }
+                        
+                        Text(
+                            user.streak == 0 ? "Inactive" :
+                            user.streak == 1 ? "1 day 🔥" :
+                            "\(user.streak) days 🔥"
+                        )
+                        .foregroundStyle(Color(user.isStreakCompletedToday ? .green : .red))
+                        .frame(alignment: .trailing)
                     }
 
                     HStack {
@@ -116,8 +119,9 @@ struct AccountView: View {
                 }
 
                 Section(header: Text("Admin")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.white.opacity(0.5))
+
                 ) {
                     HStack {
                         Text("Add user XP")
@@ -146,9 +150,14 @@ struct AccountView: View {
                                 user.streak = 0
                                 user.isStreakCompletedToday = false
                                 user.playedStreakAnimation = false
+                                user.hasOpenedBefore = false
                             }
                     }
                 }
+                Color.clear
+                    .frame(height: 40)
+                    .listRowBackground(Color.clear)
+
             }
             .listStyle(.insetGrouped)
             .scrollDismissesKeyboard(.interactively)

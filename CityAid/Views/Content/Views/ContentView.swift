@@ -16,7 +16,6 @@ extension Color {
     }
 }
 
-// MARK: - ContentView
 struct ContentView: View {
     // User and Contributions
     @StateObject private var user = UserData()
@@ -34,6 +33,7 @@ struct ContentView: View {
     @State var totalContributionCardSelected: UUID = totalContributionMilestones.first!.id
     
     @State private var showStreakAnimation: Bool = false
+    @State private var showOnboarding: Bool = false
 
     // Selected Types
     @State private var selectedType: TypeOfContribution? = nil
@@ -43,10 +43,15 @@ struct ContentView: View {
     @State private var selectedTab: Tab = .home
     @State private var valuesTabActive: Bool = false
     
+    // Time management
+    var challengeManager: ChallengeManager {
+        ChallengeManager(user: user)
+    }
+    
     var body: some View {
         ZStack {
             TabView (selection: $selectedTab) {
-                HomeView()
+                HomeView(backgroundMode: $backgroundMode)
                     .tabItem { Label("Home", systemImage: "house.fill") }
                     .tag(Tab.home)
                 ChallengesView(selectedLevelCard: $levelCardSelected, selectedTotalContributionCard: $totalContributionCardSelected)
@@ -92,7 +97,7 @@ struct ContentView: View {
                         .font(.system(size: 36))
                         .frame(width: 70, height: 70)
                         .contentShape(Rectangle())
-                    
+
                         .glassEffect(.clear.interactive().tint(.blue))
                         .glassEffectID("button", in: buttons)
                     
@@ -196,6 +201,13 @@ struct ContentView: View {
             .padding(.bottom, 75)
             .ignoresSafeArea(.keyboard)
             
+            
+            .sheet(isPresented: $showOnboarding, onDismiss: {
+                user.hasOpenedBefore = true
+            }) {
+                OnboardingSheet()
+            }
+
             .sheet(item: $infoSelectedType, onDismiss: { DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { backgroundMode = .none } }) { type in
                 InfoSheet(type: type)
                 .navigationTransition(.zoom(sourceID: "transition-id", in: buttons))
@@ -224,6 +236,17 @@ struct ContentView: View {
                     }
                 }
             )
+        }
+        .onAppear {
+            showOnboarding = !user.hasOpenedBefore
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(
+                for: .NSCalendarDayChanged
+            )
+        ) { _ in
+            challengeManager.handleDailyReset()
+            challengeManager.handleWeeklyReset()
         }
     }
 }

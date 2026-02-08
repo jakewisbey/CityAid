@@ -4,6 +4,7 @@ internal import CoreData
 // MARK: - HomeView
 struct HomeView: View{
     @EnvironmentObject var user: UserData
+    @Binding var backgroundMode : BackgroundMode
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.managedObjectContext) private var context
     
@@ -16,7 +17,7 @@ struct HomeView: View{
         GeometryReader { geo in
             ScrollView {
                 ZStack(alignment: .topLeading) {
-                    GeometryReader { bgGeo in
+                    /*GeometryReader { bgGeo in
                         Image("ContributionIcon")
                             .resizable()
                             .scaledToFit()
@@ -25,7 +26,8 @@ struct HomeView: View{
                             .offset(y: -bgGeo.frame(in: .global).minY * 0.9)
                     }
                     .frame(height: geo.size.height)
-
+                     */
+                    
                     VStack(alignment: .leading, spacing: 8) {
                         Text("CityAid")
                             .font(.system(size: 44, weight: .bold))
@@ -35,7 +37,7 @@ struct HomeView: View{
                             .opacity(0.6)
 
                         ForEach(contributions) { item in
-                            ContributionRow(user: user, item: item)
+                            ContributionRow(user: user, item: item, backgroundMode: $backgroundMode)
                         }
                     }
                     .padding(16)
@@ -57,8 +59,10 @@ struct ContributionRow: View, Identifiable {
     let id = UUID()
     let user: UserData
     var item: ContributionEntity
+    @Binding public var backgroundMode: BackgroundMode
+    @State private var contributionToEdit: ContributionEntity? = nil
     @Environment(\.managedObjectContext) private var context
-
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -75,14 +79,21 @@ struct ContributionRow: View, Identifiable {
             Spacer()
             
             Menu {
+                Button () {
+                    contributionToEdit = item
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                }
+
                 Menu() {
+                    
                     Button {
                         // Use today's date
                         DuplicateContribution(contribution: item, duplicateDate: false, user: user)
                     } label: {
                         Label("Use today's date", systemImage: "calendar")
                     }
-
+                    
                     Button {
                         // Keep the original contribution date
                         DuplicateContribution(contribution: item, duplicateDate: true, user: user)
@@ -92,7 +103,7 @@ struct ContributionRow: View, Identifiable {
                 } label: {
                     Label("Duplicate", systemImage: "document.on.document")
                 }
-
+                
                 Button(role: .destructive) {
                     DeleteContribution(contribution: item)
                 } label: {
@@ -103,13 +114,21 @@ struct ContributionRow: View, Identifiable {
                     .frame(width: 40, height: 40)
             }
         }
+        .sheet(item: $contributionToEdit, onDismiss: {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                backgroundMode = .none
+            }
+        }) { contribution in
+            EditContributionSheet(contribution: contribution, user: user)
+        }            //.navigationTransition(.zoom(sourceID: "transition-id", in: buttons))
+
     }
     
     func DuplicateContribution(contribution: ContributionEntity, duplicateDate: Bool, user: UserData) {
         let duplicateContribution = ContributionEntity(context: context)
         duplicateContribution.title = contribution.title
         duplicateContribution.type = contribution.type
-
+        
         if duplicateDate {
             duplicateContribution.date = contribution.date
         } else {
@@ -121,13 +140,14 @@ struct ContributionRow: View, Identifiable {
         
         try? context.save()
     }
-        
+    
     func DeleteContribution (contribution: ContributionEntity) {
         context.delete(contribution)
         try? context.save()
     }
 }
 
+
 #Preview {
-    HomeView()
+    HomeView(backgroundMode: .constant(.none))
 }

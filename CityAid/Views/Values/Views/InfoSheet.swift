@@ -81,6 +81,7 @@ struct InfoSheet: View {
                 Text("\(config.caption)")
                     .font(.system(size: 18, weight: .regular).italic())
                     .foregroundStyle(Color(.secondaryLabel))
+                    .minimumScaleFactor(0.5)
                 
                 Text("\n🌆 City Effects ")
                     .font(.system(size: 20))

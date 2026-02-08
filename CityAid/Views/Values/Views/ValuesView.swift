@@ -34,6 +34,8 @@ struct ValuesView: View {
                 Text("Why do your contributions matter?")
                     .font(.system(size: 32, weight: .bold))
                 Text("Every contribution counts - even a one-time act of kindness can make a lasting difference in your community. Learn how and why each action makes an impact.")
+                    .font(.system(size: 16).italic())
+                    .foregroundStyle(Color(.secondaryLabel))
                 
                 GeometryReader { proxy in
                     let horizontalPadding = max((proxy.size.width - 200) / 2, 0)

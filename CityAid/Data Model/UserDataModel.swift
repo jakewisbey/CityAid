@@ -12,6 +12,8 @@ final class UserData: ObservableObject {
     @AppStorage("IsStreakCompletedToday") var isStreakCompletedToday: Bool = false
     @AppStorage("Target") var target = 4
     
+    @AppStorage("HasOpenedBefore") var hasOpenedBefore: Bool = false
+    
     @AppStorage("SelectedChallengeContributionTypes") private var selectedChallengeContributionTypesData: Data = Data()
     @Published var selectedChallengeContributionTypes: [TypeOfContribution] = [] {
         didSet {

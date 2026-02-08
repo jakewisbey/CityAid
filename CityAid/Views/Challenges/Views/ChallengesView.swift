@@ -89,7 +89,7 @@ struct ChallengesView: View {
                     Text((challengeManager.calculateTimeInterval(nextReset: challengeManager.nextDailyReset())))
                         .font(.system(size: 14, weight: .regular))
                         .foregroundStyle(.gray.opacity(0.9))
-
+                        .contentTransition(.numericText())
                     
                     Image(systemName: "dice")
                         .frame(width: 40, height: 40)
@@ -152,7 +152,7 @@ struct ChallengesView: View {
                     Text(challengeManager.calculateTimeInterval(nextReset: challengeManager.nextWeeklyReset()))
                         .font(.system(size: 14, weight: .regular))
                         .foregroundStyle(.gray.opacity(0.9))
-
+                        .contentTransition(.numericText())
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
@@ -292,26 +292,6 @@ struct ChallengesView: View {
             }
             .padding(16)
             .padding(.bottom, 150)
-            .onAppear {
-                challengeManager.handleDailyReset()
-                challengeManager.handleWeeklyReset()
-            }
-            .onReceive(
-                NotificationCenter.default.publisher(
-                    for: UIApplication.willEnterForegroundNotification
-                )
-            ) { _ in
-                challengeManager.handleDailyReset()
-                challengeManager.handleWeeklyReset()
-            }
-            .onReceive(
-                NotificationCenter.default.publisher(
-                    for: .NSCalendarDayChanged
-                )
-            ) { _ in
-                challengeManager.handleDailyReset()
-                challengeManager.handleWeeklyReset()
-            }
         }
     }
     

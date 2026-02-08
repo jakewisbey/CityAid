@@ -3,9 +3,10 @@ internal import CoreData
 import PhotosUI
 import AVKit
 
-struct NewContributionSheet: View {
-    var type: TypeOfContribution
+struct EditContributionSheet: View {
+    var contribution: ContributionEntity
     @Namespace private var pickerNamespace
+    
     @State private var selectedType: TypeOfContribution
     @Environment(\.dismiss) private var dismiss
     
@@ -13,10 +14,18 @@ struct NewContributionSheet: View {
     let user: UserData
     @FocusState private var isTitleFocused: Bool
     
-    init(type: TypeOfContribution, user: UserData) {
-        self.type = type
+    init(contribution: ContributionEntity, user: UserData) {
         self.user = user
-        _selectedType = State(initialValue: type)
+        self.contribution = contribution
+
+        let initialType = TypeOfContribution(rawValue: contribution.type ?? "Cleanliness") ?? .cleanliness
+        _selectedType = State(initialValue: initialType)
+
+        _contributionTitle = State(initialValue: contribution.title ?? "")
+        _contributionType = State(initialValue: initialType)
+        _contributionDate = State(initialValue: contribution.date ?? Date())
+        //media too pls
+        _contributionNotes = State(initialValue: contribution.notes ?? "")
     }
     
     var contributionManager: ContributionManager {
@@ -24,6 +33,7 @@ struct NewContributionSheet: View {
     }
     
     @State private var contributionTitle: String = ""
+    @State private var contributionType: TypeOfContribution = .cleanliness
     @State private var contributionDate: Date = Date()
     @State private var contributionMedia: [MediaItem] = []
     @State private var contributionNotes: String = ""
@@ -117,15 +127,7 @@ struct NewContributionSheet: View {
                     Text("Photos & Videos")
                         .font(.system(size: 24).bold())
                     
-                    MediaPickerRow(
-                        contributionMedia: $contributionMedia,
-                        selectedItems: $selectedItems,
-                        contributionManager: contributionManager,
-                        onImageTap: {
-                            index, image in photoViewerImage = image; tappedPhotoID = "photo-\(index)"
-                        },
-                        pickerNamespace: pickerNamespace
-                    )
+                    MediaPickerRow(contributionMedia: $contributionMedia, selectedItems: $selectedItems, contributionManager: contributionManager, onImageTap: { index, image in photoViewerImage = image; tappedPhotoID = "photo-\(index)" }, pickerNamespace: pickerNamespace)
                         .onChange(of: selectedItems) { oldItems, newItems in
                         contributionMedia.removeAll()
                         
@@ -163,7 +165,7 @@ struct NewContributionSheet: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                     
                     Button("Save Contribution") {
-                        contributionManager.saveContribution(contributionTitle: contributionTitle, contributionDate: contributionDate, selectedType: selectedType, contributionNotes: contributionNotes)
+                        contributionManager.editContribution(contribution: contribution, contributionTitle: contributionTitle, contributionDate: contributionDate, selectedType: selectedType, contributionNotes: contributionNotes)
                         dismiss()
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -199,19 +201,3 @@ struct NewContributionSheet: View {
         }
     }
 }
-
-#Preview("NewContributionSheet") {
-    // In-memory Core Data stack for previews
-    let container = NSPersistentContainer(name: "CityAidModel")
-    let description = NSPersistentStoreDescription()
-    description.type = NSInMemoryStoreType
-    container.persistentStoreDescriptions = [description]
-    container.loadPersistentStores { _, _ in }
-    let context = container.viewContext
-
-    return NewContributionSheet(type: .cleanliness, user: UserData())
-        .environment(\.managedObjectContext, context)
-        .preferredColorScheme(.dark)
-}
-
-

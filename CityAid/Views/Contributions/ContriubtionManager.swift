@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import AVKit
 internal import CoreData
 
 class ContributionManager {
@@ -35,7 +36,21 @@ class ContributionManager {
             DispatchQueue.main.async {
                 textField.selectedTextRange = textField.textRange(from: textField.beginningOfDocument, to: textField.endOfDocument)
             }
+    }
+    
+    func generateThumbnail(from url: URL, at time: CMTime = CMTime(seconds: 1, preferredTimescale: 600)) -> UIImage? {
+        let asset = AVAsset(url: url)
+        let imageGenerator = AVAssetImageGenerator(asset: asset)
+        imageGenerator.appliesPreferredTrackTransform = true
+
+        do {
+            let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
+            return UIImage(cgImage: cgImage)
+        } catch {
+            print("Error generating thumbnail: \(error)")
+            return nil
         }
+    }
     
     func saveContribution(contributionTitle: String, contributionDate: Date, selectedType: TypeOfContribution, contributionNotes: String) {
         let entity = ContributionEntity(context: context)
@@ -68,4 +83,28 @@ class ContributionManager {
         try? context.save()
     }
 
+    func editContribution (contribution: ContributionEntity, contributionTitle: String, contributionDate: Date, selectedType: TypeOfContribution, contributionNotes: String) {
+        contribution.title = contributionTitle
+        contribution.date = contributionDate
+        contribution.type = selectedType.rawValue
+        contribution.notes = contributionNotes
+        
+        try? context.save()
+    }
+}
+
+enum TypeOfContribution: String, Identifiable, Codable, CaseIterable{
+    case cleanliness = "Cleanliness"
+    case plantcare = "Plant Care"
+    case donation = "Donation"
+    case kindness = "Kindness"
+    case animalcare = "Animal Care"
+    case other = "Other"
+    
+    var id: String { rawValue }
+}
+
+enum MediaItem {
+    case photo(UIImage)
+    case video(URL)
 }
