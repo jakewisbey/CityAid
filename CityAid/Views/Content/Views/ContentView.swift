@@ -26,6 +26,7 @@ struct ContentView: View {
     // Animation handling
     @Namespace private var buttons
     @State private var isExpanded: Bool = false
+    @State private var selectedBubbleID: String = ""
     @State private var backgroundMode: BackgroundMode = .none
     
     @State var cardSelected: TypeOfContribution? = nil
@@ -87,6 +88,9 @@ struct ContentView: View {
             LinearGradient(colors: [Color(red: 0/255, green: 0/255, blue: 30/255), .black.opacity(0.3)], startPoint: .top, endPoint: .center)
                 .opacity(backgroundMode == .sheet ? 1 : 0)
                 .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation(.spring()) { backgroundMode = .none }
+                }
                 .animation(.easeOut(duration: 0.45), value: backgroundMode)
 
             
@@ -125,6 +129,7 @@ struct ContentView: View {
                         isExpanded: $isExpanded,
                         selectedType: $selectedType,
                         backgroundMode: $backgroundMode,
+                        selectedBubbleID: $selectedBubbleID,
                         buttons: buttons
                     )
                         
@@ -138,6 +143,7 @@ struct ContentView: View {
                         isExpanded: $isExpanded,
                         selectedType: $selectedType,
                         backgroundMode: $backgroundMode,
+                        selectedBubbleID: $selectedBubbleID,
                         buttons: buttons
                     )
                                         
@@ -151,6 +157,7 @@ struct ContentView: View {
                         isExpanded: $isExpanded,
                         selectedType: $selectedType,
                         backgroundMode: $backgroundMode,
+                        selectedBubbleID: $selectedBubbleID,
                         buttons: buttons
                     )
                     
@@ -164,6 +171,7 @@ struct ContentView: View {
                         isExpanded: $isExpanded,
                         selectedType: $selectedType,
                         backgroundMode: $backgroundMode,
+                        selectedBubbleID: $selectedBubbleID,
                         buttons: buttons
                     )
                     
@@ -177,6 +185,7 @@ struct ContentView: View {
                         isExpanded: $isExpanded,
                         selectedType: $selectedType,
                         backgroundMode: $backgroundMode,
+                        selectedBubbleID: $selectedBubbleID,
                         buttons: buttons
                     )
                     
@@ -190,6 +199,7 @@ struct ContentView: View {
                         isExpanded: $isExpanded,
                         selectedType: $selectedType,
                         backgroundMode: $backgroundMode,
+                        selectedBubbleID: $selectedBubbleID,
                         buttons: buttons
                     )
                     
@@ -208,13 +218,13 @@ struct ContentView: View {
                 OnboardingSheet()
             }
 
-            .sheet(item: $infoSelectedType, onDismiss: { DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { backgroundMode = .none } }) { type in
+            .sheet(item: $infoSelectedType, onDismiss: {  backgroundMode = .none }) { type in
                 InfoSheet(type: type)
-                .navigationTransition(.zoom(sourceID: "transition-id", in: buttons))
+                    .navigationTransition(.zoom(sourceID: "transition-id", in: buttons))
             }
-            .sheet(item: $selectedType, onDismiss: { DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { backgroundMode = .none } } ) { type in
-                NewContributionSheet(type: type, user: user)
-                .navigationTransition(.zoom(sourceID: "transition-id", in: buttons))
+            .sheet(item: $selectedType, onDismiss: { backgroundMode = .none } ) { type in
+                NewContributionSheet(type: type, user: user, backgroundMode: $backgroundMode)
+                    .navigationTransition(.zoom(sourceID: selectedBubbleID, in: buttons))
                 .onDisappear {
                     if !user.playedStreakAnimation && user.isStreakCompletedToday {
                         showStreakAnimation = true

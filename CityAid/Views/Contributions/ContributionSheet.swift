@@ -12,11 +12,16 @@ struct NewContributionSheet: View {
     @Environment(\.managedObjectContext) private var context
     let user: UserData
     @FocusState private var isTitleFocused: Bool
+
+    // Animation handling
+    @Binding var backgroundMode: BackgroundMode
+
     
-    init(type: TypeOfContribution, user: UserData) {
+    init(type: TypeOfContribution, user: UserData, backgroundMode: Binding<BackgroundMode>) {
         self.type = type
         self.user = user
         _selectedType = State(initialValue: type)
+        self._backgroundMode = backgroundMode
     }
     
     var contributionManager: ContributionManager {
@@ -164,6 +169,7 @@ struct NewContributionSheet: View {
                     
                     Button("Save Contribution") {
                         contributionManager.saveContribution(contributionTitle: contributionTitle, contributionDate: contributionDate, selectedType: selectedType, contributionNotes: contributionNotes)
+                        backgroundMode = .none
                         dismiss()
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -209,7 +215,7 @@ struct NewContributionSheet: View {
     container.loadPersistentStores { _, _ in }
     let context = container.viewContext
 
-    return NewContributionSheet(type: .cleanliness, user: UserData())
+    return NewContributionSheet(type: .cleanliness, user: UserData(), backgroundMode: .constant(.none))
         .environment(\.managedObjectContext, context)
         .preferredColorScheme(.dark)
 }

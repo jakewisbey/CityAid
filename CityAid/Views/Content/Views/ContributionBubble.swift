@@ -10,7 +10,9 @@ struct ContributionBubble: View {
     @Binding var isExpanded: Bool
     @Binding var selectedType: TypeOfContribution?
     @Binding var backgroundMode: BackgroundMode
+    @Binding var selectedBubbleID: String
     let buttons: Namespace.ID
+    
     
     var body: some View {
         Image(systemName: iconName)
@@ -20,14 +22,16 @@ struct ContributionBubble: View {
             .frame(width: 50, height: 50)
             .contentShape(Rectangle())
             .allowsHitTesting(isExpanded)
-
+        
+            .matchedTransitionSource(id: id, in: buttons)
             .glassEffect(.clear.interactive())
             .glassEffectID(id, in: buttons)
 
             .onTapGesture {
-                isExpanded = false
                 selectedType = typeOfContribution
+                selectedBubbleID = id
                 backgroundMode = .sheet
+                isExpanded = false
             }
             .offset(x: isExpanded ? xCoord : 0,
                     y: isExpanded ? yCoord : 0)

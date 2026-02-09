@@ -7,7 +7,6 @@ struct HomeView: View{
     @Binding var backgroundMode : BackgroundMode
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.managedObjectContext) private var context
-    
 
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
@@ -17,17 +16,6 @@ struct HomeView: View{
         GeometryReader { geo in
             ScrollView {
                 ZStack(alignment: .topLeading) {
-                    /*GeometryReader { bgGeo in
-                        Image("ContributionIcon")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: geo.size.width,
-                                   height: geo.size.height)
-                            .offset(y: -bgGeo.frame(in: .global).minY * 0.9)
-                    }
-                    .frame(height: geo.size.height)
-                     */
-                    
                     VStack(alignment: .leading, spacing: 8) {
                         Text("CityAid")
                             .font(.system(size: 44, weight: .bold))
@@ -38,8 +26,10 @@ struct HomeView: View{
 
                         ForEach(contributions) { item in
                             ContributionRow(user: user, item: item, backgroundMode: $backgroundMode)
+                                .transition(.opacity.combined(with: .scale))
                         }
                     }
+                    .animation(.spring(), value: contributions.map { $0.objectID })
                     .padding(16)
                     .padding(.top, 30)
                 }
@@ -62,6 +52,7 @@ struct ContributionRow: View, Identifiable {
     @Binding public var backgroundMode: BackgroundMode
     @State private var contributionToEdit: ContributionEntity? = nil
     @Environment(\.managedObjectContext) private var context
+    @Namespace var animationNamespace
     
     var body: some View {
         HStack {
@@ -76,6 +67,7 @@ struct ContributionRow: View, Identifiable {
                         .foregroundStyle(Color(.secondaryLabel))
                 }
             }
+            .matchedTransitionSource(id: id, in: animationNamespace)
             Spacer()
             
             Menu {
@@ -114,14 +106,15 @@ struct ContributionRow: View, Identifiable {
                     .frame(width: 40, height: 40)
             }
         }
+        
         .sheet(item: $contributionToEdit, onDismiss: {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 backgroundMode = .none
             }
         }) { contribution in
-            EditContributionSheet(contribution: contribution, user: user)
-        }            //.navigationTransition(.zoom(sourceID: "transition-id", in: buttons))
-
+            EditContributionSheet(contribution: contribution, user: user, backgroundMode: $backgroundMode)
+                .navigationTransition(.zoom(sourceID: id, in: animationNamespace))
+        }
     }
     
     func DuplicateContribution(contribution: ContributionEntity, duplicateDate: Bool, user: UserData) {
@@ -151,3 +144,4 @@ struct ContributionRow: View, Identifiable {
 #Preview {
     HomeView(backgroundMode: .constant(.none))
 }
+
