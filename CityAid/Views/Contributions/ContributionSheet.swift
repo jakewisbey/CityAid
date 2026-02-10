@@ -168,7 +168,7 @@ struct NewContributionSheet: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                     
                     Button("Save Contribution") {
-                        contributionManager.saveContribution(contributionTitle: contributionTitle, contributionDate: contributionDate, selectedType: selectedType, contributionNotes: contributionNotes)
+                        contributionManager.saveContribution(contributionTitle: contributionTitle, contributionDate: contributionDate, contributionMedia: contributionMedia, selectedType: selectedType, contributionNotes: contributionNotes)
                         backgroundMode = .none
                         dismiss()
                     }
@@ -187,12 +187,14 @@ struct NewContributionSheet: View {
             .scrollDisabled(true)
             .ignoresSafeArea(.keyboard)
         }
+        
         .background(LinearGradient(colors: [.purple.opacity(0.2), .black, .blue.opacity(0.2)],
                                    startPoint: UnitPoint(x: 0, y: 1),
                                    endPoint: UnitPoint(x: 1, y: 0)))
         .background(LinearGradient(colors: [.red.opacity(0.3), .black, .indigo.opacity(0.2)],
                                    startPoint: UnitPoint(x: 1, y: 1),
                                    endPoint: UnitPoint(x: 0, y: 0)))
+         
         .ignoresSafeArea(.keyboard)
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {

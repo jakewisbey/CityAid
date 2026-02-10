@@ -3,6 +3,8 @@ import SwiftUI
 struct ContributionBubble: View {
     let iconName: String
     let id: String
+    let originXCoord: CGFloat
+    let originYCoord: CGFloat
     let xCoord: CGFloat
     let yCoord: CGFloat
     let delay: Float
@@ -15,7 +17,8 @@ struct ContributionBubble: View {
     
     
     var body: some View {
-        Image(systemName: iconName)
+        Image(systemName: isExpanded ? iconName : "app.background.dotted")
+            .contentTransition(.symbolEffect(.replace))
             .font(.headline)
             .opacity(isExpanded ? 1 : 0)
 
@@ -33,6 +36,8 @@ struct ContributionBubble: View {
                 backgroundMode = .sheet
                 isExpanded = false
             }
+            .position(x: originXCoord, y: originYCoord)
+        
             .offset(x: isExpanded ? xCoord : 0,
                     y: isExpanded ? yCoord : 0)
             

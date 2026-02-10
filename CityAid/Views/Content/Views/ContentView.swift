@@ -19,6 +19,8 @@ extension Color {
 struct ContentView: View {
     // User and Contributions
     @StateObject private var user = UserData()
+    @Environment(\.managedObjectContext) private var context
+
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
     ) private var contributions: FetchedResults<ContributionEntity>
@@ -28,6 +30,8 @@ struct ContentView: View {
     @State private var isExpanded: Bool = false
     @State private var selectedBubbleID: String = ""
     @State private var backgroundMode: BackgroundMode = .none
+    
+    @State private var quickLogIsExpanded: Bool = false
     
     @State var cardSelected: TypeOfContribution? = nil
     @State var levelCardSelected: UUID = levelMilestones.first!.id
@@ -81,7 +85,7 @@ struct ContentView: View {
                 .opacity(backgroundMode == .expanded ? 0.5 : 0)
                 .ignoresSafeArea()
                 .onTapGesture {
-                    withAnimation(.spring()) { backgroundMode = .none; isExpanded = false }
+                    withAnimation(.spring()) { backgroundMode = .none; isExpanded = false; quickLogIsExpanded = false }
                 }
                 .animation(.easeOut(duration: 0.25), value: backgroundMode)
             
@@ -92,122 +96,227 @@ struct ContentView: View {
                     withAnimation(.spring()) { backgroundMode = .none }
                 }
                 .animation(.easeOut(duration: 0.45), value: backgroundMode)
+            
+            GeometryReader { geo in
+                RadialGradient(
+                    gradient: Gradient(colors: [.black.opacity(0.8), .black.opacity(0.6), .black.opacity(0)]),
+                    center: .center,
+                    startRadius: 0,
+                    endRadius: 800
+                )
+                .frame(width: 1600, height: 1600)
+                .clipShape(Circle())
+                .opacity(backgroundMode == .quickLog ? 1 : 0)
+                .onTapGesture {
+                    withAnimation(.spring()) { backgroundMode = .none; quickLogIsExpanded = false }
+                }
+                .animation(.easeOut(duration: 0.45), value: backgroundMode)
+                .position(x: geo.size.width, y: geo.size.height * 0.5)
+            }
 
             
-            GlassEffectContainer (spacing: 20) {
-                ZStack {
-                    Image(systemName: valuesTabActive ? "info.circle.text.page" : "plus")
-                        .contentTransition(.symbolEffect(.replace))
-                        .font(.system(size: 36))
-                        .frame(width: 70, height: 70)
-                        .contentShape(Rectangle())
-
-                        .glassEffect(.clear.interactive().tint(.blue))
-                        .glassEffectID("button", in: buttons)
-                    
-                        .onTapGesture {
-                            if !valuesTabActive {
-                                withAnimation {
-                                    isExpanded.toggle()
-                                    if isExpanded { backgroundMode = .expanded }
-                                    else { backgroundMode = .none }
-                                }
-                            }
-                            else {
-                                infoSelectedType = cardSelected
-                                backgroundMode = .expanded
-                            }
+            GlassEffectContainer(spacing: 20) {
+                GeometryReader { geo in
+                    // Hold Add button and ContributionBubbles
+                    ZStack {
+                        // ContributionBubbles
+                        if !quickLogIsExpanded && !valuesTabActive {
+                            ContributionBubble(
+                                iconName: "bubbles.and.sparkles",
+                                id: "Cleanliness",
+                                originXCoord: geo.size.width * 0.5,
+                                originYCoord: geo.size.height * 0.94,
+                                xCoord: -120,
+                                yCoord: -20,
+                                delay: 0.05,
+                                typeOfContribution: .cleanliness,
+                                isExpanded: $isExpanded,
+                                selectedType: $selectedType,
+                                backgroundMode: $backgroundMode,
+                                selectedBubbleID: $selectedBubbleID,
+                                buttons: buttons
+                            )
+                            
+                            ContributionBubble(
+                                iconName: "leaf",
+                                id: "Plant Care",
+                                originXCoord: geo.size.width * 0.5,
+                                originYCoord: geo.size.height * 0.94,
+                                xCoord: -90,
+                                yCoord: -80,
+                                delay: 0.15,
+                                typeOfContribution: .plantcare,
+                                isExpanded: $isExpanded,
+                                selectedType: $selectedType,
+                                backgroundMode: $backgroundMode,
+                                selectedBubbleID: $selectedBubbleID,
+                                buttons: buttons
+                            )
+                            
+                            ContributionBubble(
+                                iconName: "heart",
+                                id: "Kindness",
+                                originXCoord: geo.size.width * 0.5,
+                                originYCoord: geo.size.height * 0.94,
+                                xCoord: -40,
+                                yCoord: -130,
+                                delay: 0.10,
+                                typeOfContribution: .kindness,
+                                isExpanded: $isExpanded,
+                                selectedType: $selectedType,
+                                backgroundMode: $backgroundMode,
+                                selectedBubbleID: $selectedBubbleID,
+                                buttons: buttons
+                            )
+                            
+                            ContributionBubble(
+                                iconName: "gift",
+                                id: "Donation",
+                                originXCoord: geo.size.width * 0.5,
+                                originYCoord: geo.size.height * 0.94,
+                                xCoord: 30,
+                                yCoord: -130,
+                                delay: 0.05,
+                                typeOfContribution: .donation,
+                                isExpanded: $isExpanded,
+                                selectedType: $selectedType,
+                                backgroundMode: $backgroundMode,
+                                selectedBubbleID: $selectedBubbleID,
+                                buttons: buttons
+                            )
+                            
+                            ContributionBubble(
+                                iconName: "dog",
+                                id: "Animal Care",
+                                originXCoord: geo.size.width * 0.5,
+                                originYCoord: geo.size.height * 0.94,
+                                xCoord: 90,
+                                yCoord: -80,
+                                delay: 0.20,
+                                typeOfContribution: .animalcare,
+                                isExpanded: $isExpanded,
+                                selectedType: $selectedType,
+                                backgroundMode: $backgroundMode,
+                                selectedBubbleID: $selectedBubbleID,
+                                buttons: buttons
+                            )
+                            
+                            ContributionBubble(
+                                iconName: "ellipsis.circle",
+                                id: "Other",
+                                originXCoord: geo.size.width * 0.5,
+                                originYCoord: geo.size.height * 0.94,
+                                xCoord: 120,
+                                yCoord: -20,
+                                delay: 0.12,
+                                typeOfContribution: .other,
+                                isExpanded: $isExpanded,
+                                selectedType: $selectedType,
+                                backgroundMode: $backgroundMode,
+                                selectedBubbleID: $selectedBubbleID,
+                                buttons: buttons
+                            )
                         }
-                    
-                    ContributionBubble(
-                        iconName: "bubbles.and.sparkles",
-                        id: "Cleanliness",
-                        xCoord: -120,
-                        yCoord: -20,
-                        delay: 0.05,
-                        typeOfContribution: .cleanliness,
-                        isExpanded: $isExpanded,
-                        selectedType: $selectedType,
-                        backgroundMode: $backgroundMode,
-                        selectedBubbleID: $selectedBubbleID,
-                        buttons: buttons
-                    )
                         
-                    ContributionBubble(
-                        iconName: "leaf",
-                        id: "Plant Care",
-                        xCoord: -90,
-                        yCoord: -80,
-                        delay: 0.15,
-                        typeOfContribution: .plantcare,
-                        isExpanded: $isExpanded,
-                        selectedType: $selectedType,
-                        backgroundMode: $backgroundMode,
-                        selectedBubbleID: $selectedBubbleID,
-                        buttons: buttons
-                    )
-                                        
-                    ContributionBubble(
-                        iconName: "heart",
-                        id: "Kindness",
-                        xCoord: -40,
-                        yCoord: -130,
-                        delay: 0.10,
-                        typeOfContribution: .kindness,
-                        isExpanded: $isExpanded,
-                        selectedType: $selectedType,
-                        backgroundMode: $backgroundMode,
-                        selectedBubbleID: $selectedBubbleID,
-                        buttons: buttons
-                    )
-                    
-                    ContributionBubble(
-                        iconName: "gift",
-                        id: "Donation",
-                        xCoord: 30,
-                        yCoord: -130,
-                        delay: 0.05,
-                        typeOfContribution: .donation,
-                        isExpanded: $isExpanded,
-                        selectedType: $selectedType,
-                        backgroundMode: $backgroundMode,
-                        selectedBubbleID: $selectedBubbleID,
-                        buttons: buttons
-                    )
-                    
-                    ContributionBubble(
-                        iconName: "dog",
-                        id: "Animal Care",
-                        xCoord: 90,
-                        yCoord: -80,
-                        delay: 0.20,
-                        typeOfContribution: .animalcare,
-                        isExpanded: $isExpanded,
-                        selectedType: $selectedType,
-                        backgroundMode: $backgroundMode,
-                        selectedBubbleID: $selectedBubbleID,
-                        buttons: buttons
-                    )
-                    
-                    ContributionBubble(
-                        iconName: "ellipsis.circle",
-                        id: "Other",
-                        xCoord: 120,
-                        yCoord: -20,
-                        delay: 0.12,
-                        typeOfContribution: .other,
-                        isExpanded: $isExpanded,
-                        selectedType: $selectedType,
-                        backgroundMode: $backgroundMode,
-                        selectedBubbleID: $selectedBubbleID,
-                        buttons: buttons
-                    )
-                    
+                        if !isExpanded && !valuesTabActive {
+                            QuickLogBubble(title: "Litter-picking",
+                                           type: .cleanliness,
+                                           originXCoord: geo.size.width * 1.2,
+                                           originYCoord: geo.size.height * 0.50,
+                                           xCoord: geo.size.width * 0.7,
+                                           yCoord: geo.size.height * 0.36,
+                                           iconName: "trash",
+                                           delay: 0.1,
+                                           user: user,
+                                           context: context,
+                                           quickLogIsExpanded:$quickLogIsExpanded,
+                                           backgroundMode: $backgroundMode,
+                                           buttons: buttons)
+                            
+                            QuickLogBubble(title: "Gave up my seat",
+                                           type: .kindness,
+                                           originXCoord: geo.size.width * 1.2,
+                                           originYCoord: geo.size.height * 0.50,
+                                           xCoord: geo.size.width * 0.67,
+                                           yCoord: geo.size.height * 0.43,
+                                           iconName: "figure.seated.side.right.child.lap",
+                                           delay: 0.05,
+                                           user: user,
+                                           context: context,
+                                           quickLogIsExpanded: $quickLogIsExpanded,
+                                           backgroundMode: $backgroundMode,
+                                           buttons: buttons)
+                            
+                            QuickLogBubble(title: "Helped with directions",
+                                           type: .kindness,
+                                           originXCoord: geo.size.width * 1.2,
+                                           originYCoord: geo.size.height * 0.50,
+                                           xCoord: geo.size.width * 0.59,
+                                           yCoord: geo.size.height * 0.5,
+                                           iconName: "map",
+                                           delay: 0.00,
+                                           user: user,
+                                           context: context,
+                                           quickLogIsExpanded: $quickLogIsExpanded,
+                                           backgroundMode: $backgroundMode,
+                                           buttons: buttons)
+                            
+                            QuickLogBubble(title: "Took someone's trash",
+                                           type: .cleanliness,
+                                           originXCoord: geo.size.width * 1.2,
+                                           originYCoord: geo.size.height * 0.5,
+                                           xCoord: geo.size.width * 0.60,
+                                           yCoord: geo.size.height * 0.57,
+                                           iconName: "bubbles.and.sparkles",
+                                           delay: 0.05,
+                                           user: user,
+                                           context: context,
+                                           quickLogIsExpanded: $quickLogIsExpanded,
+                                           backgroundMode: $backgroundMode,
+                                           buttons: buttons)
+                            
+                            QuickLogBubble(title: "Fed an animal",
+                                           type: .cleanliness,
+                                           originXCoord: geo.size.width * 1.2,
+                                           originYCoord: geo.size.height * 0.5,
+                                           xCoord: geo.size.width * 0.68,
+                                           yCoord: geo.size.height * 0.64,
+                                           iconName: "carrot",
+                                           delay: 0.1,
+                                           user: user,
+                                           context: context,
+                                           quickLogIsExpanded: $quickLogIsExpanded,
+                                           backgroundMode: $backgroundMode,
+                                           buttons: buttons)
+                        }
+                        
+                        if !quickLogIsExpanded {
+                            Image(systemName: valuesTabActive ? "info.circle.text.page" : "plus")
+                                .contentTransition(.symbolEffect(.replace))
+                                .font(.system(size: 36))
+                                .frame(width: 70, height: 70)
+                                .contentShape(Rectangle())
+                                .glassEffect(.clear.interactive().tint(.blue))
+
+                                .clipShape(Circle())
+                                .position(x: geo.size.width * 0.5, y: geo.size.height * 0.94)
+                                .opacity(!quickLogIsExpanded ? 1 : 0)
+                                .allowsHitTesting(!quickLogIsExpanded)
+                                .onTapGesture {
+                                    if !valuesTabActive {
+                                        withAnimation {
+                                            isExpanded.toggle()
+                                            backgroundMode = isExpanded ? .expanded : .none
+                                        }
+                                    } else {
+                                        infoSelectedType = cardSelected
+                                        backgroundMode = .expanded
+                                    }
+                                }
+                        }
+                    }
                 }
-                 
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity,
-                alignment: .bottom)
             .padding(.bottom, 75)
             .ignoresSafeArea(.keyboard)
             
@@ -246,7 +355,26 @@ struct ContentView: View {
                     }
                 }
             )
+
         }
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 50)
+                .onEnded { value in
+                    // swipe from right to left
+                    if value.startLocation.x > UIScreen.main.bounds.width * 0.9 &&
+                       value.translation.width < -50 {
+                        print("swiped from right edge")
+                        quickLogIsExpanded = true
+                        backgroundMode = .quickLog
+                    }
+                    
+                    if value.translation.width > 0 && quickLogIsExpanded {
+                        quickLogIsExpanded = false
+                        backgroundMode = .none
+                    }
+
+                }
+        )
         .onAppear {
             showOnboarding = !user.hasOpenedBefore
         }
@@ -261,6 +389,55 @@ struct ContentView: View {
     }
 }
 
+struct QuickLogBubble: View {
+    let title: String
+    let type: TypeOfContribution
+    let originXCoord: CGFloat
+    let originYCoord: CGFloat
+    let xCoord: CGFloat
+    let yCoord: CGFloat
+    let iconName: String
+    let delay: Float
+    let user: UserData
+    let context: NSManagedObjectContext
+    
+    var contributionManager: ContributionManager {
+        ContributionManager(context: context, user: user)
+    }
+    
+    @Binding var quickLogIsExpanded: Bool
+    @Binding var backgroundMode: BackgroundMode
+    let buttons: Namespace.ID
+
+    var body: some View {
+        Label(title, systemImage: iconName)
+        
+        .contentTransition(.symbolEffect(.replace))
+        .font(.system(size: 20, weight: .bold).italic())
+        .scaleEffect(quickLogIsExpanded ? 1 : 0.45)
+        .opacity(quickLogIsExpanded ? 1 : 0)
+        .blur(radius: quickLogIsExpanded ? 0 : 12)
+        
+        .contentShape(Rectangle())
+        .allowsHitTesting(quickLogIsExpanded)
+    
+        .matchedTransitionSource(id: title, in: buttons)
+
+        .onTapGesture {
+            backgroundMode = .none
+            quickLogIsExpanded = false
+            
+            contributionManager.saveContribution(contributionTitle: title, contributionDate: Date(), contributionMedia: [], selectedType: type, contributionNotes: "Added via Quick Log")
+            
+        }
+        .position(x: quickLogIsExpanded ? xCoord : originXCoord,
+                  y: quickLogIsExpanded ? yCoord : originYCoord)
+        
+        .animation(.spring(response: 0.6, dampingFraction: 0.72, blendDuration: 0)
+            .delay(TimeInterval(delay)), value: quickLogIsExpanded)
+    }
+}
+
 enum Tab {
     case home
     case challenges
@@ -272,6 +449,7 @@ enum BackgroundMode {
     case none
     case expanded
     case sheet
+    case quickLog
 }
 
 #Preview {

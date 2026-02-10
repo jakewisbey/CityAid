@@ -26,7 +26,27 @@ struct EditContributionSheet: View {
         _contributionTitle = State(initialValue: contribution.title ?? "")
         _contributionType = State(initialValue: initialType)
         _contributionDate = State(initialValue: contribution.date ?? Date())
-        //media too pls
+        
+        if let mediaData = contribution.media,
+           let paths = try? JSONDecoder().decode([String].self, from: mediaData) {
+            // map strings to MediaItem
+            let mediaItems = paths.map { path -> MediaItem in
+                if path.hasSuffix(".jpg") {
+                    // image file
+                    if let image = UIImage(contentsOfFile: path) {
+                        return .photo(image)
+                    } else {
+                        return .photo(UIImage()) // fallback placeholder
+                    }
+                } else {
+                    // assume video
+                    return .video(URL(fileURLWithPath: path))
+                }
+            }
+            _contributionMedia = State(initialValue: mediaItems)
+        } else {
+            _contributionMedia = State(initialValue: [])
+        }
         _contributionNotes = State(initialValue: contribution.notes ?? "")
         
         self._backgroundMode = backgroundMode
@@ -131,7 +151,13 @@ struct EditContributionSheet: View {
                     Text("Photos & Videos")
                         .font(.system(size: 24).bold())
                     
-                    MediaPickerRow(contributionMedia: $contributionMedia, selectedItems: $selectedItems, contributionManager: contributionManager, onImageTap: { index, image in photoViewerImage = image; tappedPhotoID = "photo-\(index)" }, pickerNamespace: pickerNamespace)
+                    MediaPickerRow(contributionMedia: $contributionMedia,
+                                   selectedItems: $selectedItems,
+                                   contributionManager: contributionManager,
+                                   onImageTap: {
+                                    index, image in photoViewerImage = image; tappedPhotoID = "photo-\(index)"
+                                    },
+                                   pickerNamespace: pickerNamespace)
                         .onChange(of: selectedItems) { oldItems, newItems in
                         contributionMedia.removeAll()
                         
@@ -148,7 +174,6 @@ struct EditContributionSheet: View {
                                 .navigationTransition(.zoom(sourceID: sourceID, in: pickerNamespace))
                         }
                     }
-                    
                     
                     
                     Text("Notes")
@@ -169,7 +194,7 @@ struct EditContributionSheet: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                     
                     Button("Save Contribution") {
-                        contributionManager.editContribution(contribution: contribution, contributionTitle: contributionTitle, contributionDate: contributionDate, selectedType: selectedType, contributionNotes: contributionNotes)
+                        contributionManager.editContribution(contribution: contribution, contributionTitle: contributionTitle, contributionDate: contributionDate, contributionMedia: contributionMedia, selectedType: selectedType, contributionNotes: contributionNotes)
                         backgroundMode = .none
                         dismiss()
                     }
