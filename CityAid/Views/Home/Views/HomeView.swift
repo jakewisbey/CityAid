@@ -121,6 +121,8 @@ struct ContributionRow: View, Identifiable {
     
     func DuplicateContribution(contribution: ContributionEntity, duplicateDate: Bool, user: UserData) {
         let duplicateContribution = ContributionEntity(context: context)
+        
+        duplicateContribution.id = UUID()
         duplicateContribution.title = contribution.title
         duplicateContribution.type = contribution.type
         

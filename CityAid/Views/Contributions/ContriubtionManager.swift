@@ -52,6 +52,7 @@ class ContributionManager {
         }
     }
     
+    
     func saveContribution(contributionTitle: String, contributionDate: Date, contributionMedia: [MediaItem], selectedType: TypeOfContribution, contributionNotes: String, showStreakAnimation: Binding<Bool>) {
         
         let entity = ContributionEntity(context: context)
@@ -113,18 +114,13 @@ class ContributionManager {
         }
         
         /*
-         if user.isStreakCompletedToday && !user.playedStreakAnimation {
-         showStreakAnimation.wrappedValue = true
-         }
+        if user.isStreakCompletedToday && !user.playedStreakAnimation {
+            DispatchQueue.main.async {
+                showStreakAnimation.wrappedValue = true
+            }
+        }
          */
-        print("changedValues:", entity.changedValues())
-        print("id:", entity.id as Any)
-          print("date:", entity.date as Any)
-          print("type:", entity.type as Any)
-          print("xp:", entity.xp)
-          print("title:", entity.title as Any)
-          print("notes:", entity.notes as Any)
-          print("media is Data:", entity.media != nil)
+        
         do {
             try context.save()
         } catch let error as NSError {
@@ -134,6 +130,7 @@ class ContributionManager {
         }
     }
     
+     
     func editContribution(contribution: ContributionEntity, contributionTitle: String, contributionDate: Date, contributionMedia: [MediaItem], selectedType: TypeOfContribution, contributionNotes: String) {
         contribution.title = contributionTitle
         contribution.date = contributionDate
