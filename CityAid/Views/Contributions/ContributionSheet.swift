@@ -15,23 +15,26 @@ struct NewContributionSheet: View {
 
     // Animation handling
     @Binding var backgroundMode: BackgroundMode
+    @Binding var showStreakAnimation: Bool
 
     
-    init(type: TypeOfContribution, user: UserData, backgroundMode: Binding<BackgroundMode>) {
+    init(type: TypeOfContribution, user: UserData, backgroundMode: Binding<BackgroundMode>, showStreakAnimation: Binding<Bool>) {
         self.type = type
         self.user = user
         _selectedType = State(initialValue: type)
         self._backgroundMode = backgroundMode
+        self._showStreakAnimation = showStreakAnimation
     }
     
     var contributionManager: ContributionManager {
-        ContributionManager(context: context, user: user)
+        ContributionManager(user: user, context: context)
     }
     
     @State private var contributionTitle: String = ""
     @State private var contributionDate: Date = Date()
     @State private var contributionMedia: [MediaItem] = []
     @State private var contributionNotes: String = ""
+    @State private var contributionXP: Int = 0
     @State private var selectedItems: [PhotosPickerItem] = []
     
     // Animation handling
@@ -168,7 +171,7 @@ struct NewContributionSheet: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                     
                     Button("Save Contribution") {
-                        contributionManager.saveContribution(contributionTitle: contributionTitle, contributionDate: contributionDate, contributionMedia: contributionMedia, selectedType: selectedType, contributionNotes: contributionNotes)
+                        contributionManager.saveContribution(contributionTitle: contributionTitle, contributionDate: contributionDate, contributionMedia: contributionMedia, selectedType: selectedType, contributionNotes: contributionNotes, showStreakAnimation: $showStreakAnimation)
                         backgroundMode = .none
                         dismiss()
                     }
@@ -217,7 +220,7 @@ struct NewContributionSheet: View {
     container.loadPersistentStores { _, _ in }
     let context = container.viewContext
 
-    return NewContributionSheet(type: .cleanliness, user: UserData(), backgroundMode: .constant(.none))
+    return NewContributionSheet(type: .cleanliness, user: UserData(), backgroundMode: .constant(.none), showStreakAnimation: .constant(false))
         .environment(\.managedObjectContext, context)
         .preferredColorScheme(.dark)
 }

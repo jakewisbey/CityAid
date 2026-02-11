@@ -37,6 +37,24 @@ final class UserData: ObservableObject {
             }
         }
     }
+    /*
+    var quickLogs: [String : Int] = [
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+    ]
+    */
+    var quickLogs: [String: Int] = UserDefaults.standard.object(forKey: "quickLogKey") as? [String: Int] ?? [
+        "Litter-Picking": 0,
+        "Gave up my seat": 0,
+        "Helped with directions": 0,
+        "Took someone's trash": 0,
+        "Helped an animal": 0,
+        ]
+
+    
     
     @Published var weeklyChallenges: [Challenge] = []{
         didSet {
@@ -81,9 +99,16 @@ final class UserData: ObservableObject {
     }
     
     func CalculateUserLevel() {
-        if xp >= RequiredXpForLevelUp() {
+        while xp >= RequiredXpForLevelUp() {
             level += 1
             xp -= RequiredXpForLevelUp()
+        }
+        
+        // deleting a contribution removes xp, so this is used to calculate the new xp and level
+        // goes into negative which sohoudl fix
+        while xp < 0 && level > 1 {
+            level -= 1
+            xp += RequiredXpForLevelUp()
         }
     }
 
@@ -93,4 +118,3 @@ final class UserData: ObservableObject {
         return min(xpNeeded, 75)
     }
 }
-

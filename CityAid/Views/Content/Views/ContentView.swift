@@ -19,6 +19,7 @@ extension Color {
 struct ContentView: View {
     // User and Contributions
     @StateObject private var user = UserData()
+
     @Environment(\.managedObjectContext) private var context
 
     @FetchRequest(
@@ -37,6 +38,7 @@ struct ContentView: View {
     @State var levelCardSelected: UUID = levelMilestones.first!.id
     @State var totalContributionCardSelected: UUID = totalContributionMilestones.first!.id
     
+    // Animation and Onboarding
     @State private var showStreakAnimation: Bool = false
     @State private var showOnboarding: Bool = false
 
@@ -56,7 +58,7 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             TabView (selection: $selectedTab) {
-                HomeView(backgroundMode: $backgroundMode)
+                HomeView(backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
                     .tabItem { Label("Home", systemImage: "house.fill") }
                     .tag(Tab.home)
                 ChallengesView(selectedLevelCard: $levelCardSelected, selectedTotalContributionCard: $totalContributionCardSelected)
@@ -219,7 +221,8 @@ struct ContentView: View {
                         }
                         
                         if !isExpanded && !valuesTabActive {
-                            QuickLogBubble(title: "Litter-picking",
+                            QuickLogBubble(
+                                           title: "Litter-Picking",
                                            type: .cleanliness,
                                            originXCoord: geo.size.width * 1.2,
                                            originYCoord: geo.size.height * 0.50,
@@ -228,12 +231,13 @@ struct ContentView: View {
                                            iconName: "trash",
                                            delay: 0.1,
                                            user: user,
-                                           context: context,
+                                           showStreakAnimation: $showStreakAnimation,
                                            quickLogIsExpanded:$quickLogIsExpanded,
                                            backgroundMode: $backgroundMode,
                                            buttons: buttons)
                             
-                            QuickLogBubble(title: "Gave up my seat",
+                            QuickLogBubble(
+                                           title: "Gave up my seat",
                                            type: .kindness,
                                            originXCoord: geo.size.width * 1.2,
                                            originYCoord: geo.size.height * 0.50,
@@ -242,12 +246,13 @@ struct ContentView: View {
                                            iconName: "figure.seated.side.right.child.lap",
                                            delay: 0.05,
                                            user: user,
-                                           context: context,
+                                           showStreakAnimation: $showStreakAnimation,
                                            quickLogIsExpanded: $quickLogIsExpanded,
                                            backgroundMode: $backgroundMode,
                                            buttons: buttons)
                             
-                            QuickLogBubble(title: "Helped with directions",
+                            QuickLogBubble(
+                                           title: "Helped with directions",
                                            type: .kindness,
                                            originXCoord: geo.size.width * 1.2,
                                            originYCoord: geo.size.height * 0.50,
@@ -256,12 +261,13 @@ struct ContentView: View {
                                            iconName: "map",
                                            delay: 0.00,
                                            user: user,
-                                           context: context,
+                                           showStreakAnimation: $showStreakAnimation,
                                            quickLogIsExpanded: $quickLogIsExpanded,
                                            backgroundMode: $backgroundMode,
                                            buttons: buttons)
                             
-                            QuickLogBubble(title: "Took someone's trash",
+                            QuickLogBubble(
+                                           title: "Took someone's trash",
                                            type: .cleanliness,
                                            originXCoord: geo.size.width * 1.2,
                                            originYCoord: geo.size.height * 0.5,
@@ -270,21 +276,22 @@ struct ContentView: View {
                                            iconName: "bubbles.and.sparkles",
                                            delay: 0.05,
                                            user: user,
-                                           context: context,
+                                           showStreakAnimation: $showStreakAnimation,
                                            quickLogIsExpanded: $quickLogIsExpanded,
                                            backgroundMode: $backgroundMode,
                                            buttons: buttons)
                             
-                            QuickLogBubble(title: "Fed an animal",
-                                           type: .cleanliness,
+                            QuickLogBubble(
+                                           title: "Helped an animal",
+                                           type: .animalcare,
                                            originXCoord: geo.size.width * 1.2,
                                            originYCoord: geo.size.height * 0.5,
-                                           xCoord: geo.size.width * 0.68,
+                                           xCoord: geo.size.width * 0.66,
                                            yCoord: geo.size.height * 0.64,
                                            iconName: "carrot",
                                            delay: 0.1,
                                            user: user,
-                                           context: context,
+                                           showStreakAnimation: $showStreakAnimation,
                                            quickLogIsExpanded: $quickLogIsExpanded,
                                            backgroundMode: $backgroundMode,
                                            buttons: buttons)
@@ -332,21 +339,19 @@ struct ContentView: View {
                     .navigationTransition(.zoom(sourceID: "transition-id", in: buttons))
             }
             .sheet(item: $selectedType, onDismiss: { backgroundMode = .none } ) { type in
-                NewContributionSheet(type: type, user: user, backgroundMode: $backgroundMode)
+                NewContributionSheet(type: type, user: user, backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
                     .navigationTransition(.zoom(sourceID: selectedBubbleID, in: buttons))
                 .onDisappear {
                     if !user.playedStreakAnimation && user.isStreakCompletedToday {
                         showStreakAnimation = true
                         user.playedStreakAnimation = true
                     }
-                    user.CalculateUserLevel()
                 }
             }
             .overlay(
                 Group {
                     if showStreakAnimation {
                         StreakAnimation()
-                            .transition(.opacity)
                             .onAppear {
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
                                     withAnimation { showStreakAnimation = false }
@@ -386,55 +391,6 @@ struct ContentView: View {
             challengeManager.handleDailyReset()
             challengeManager.handleWeeklyReset()
         }
-    }
-}
-
-struct QuickLogBubble: View {
-    let title: String
-    let type: TypeOfContribution
-    let originXCoord: CGFloat
-    let originYCoord: CGFloat
-    let xCoord: CGFloat
-    let yCoord: CGFloat
-    let iconName: String
-    let delay: Float
-    let user: UserData
-    let context: NSManagedObjectContext
-    
-    var contributionManager: ContributionManager {
-        ContributionManager(context: context, user: user)
-    }
-    
-    @Binding var quickLogIsExpanded: Bool
-    @Binding var backgroundMode: BackgroundMode
-    let buttons: Namespace.ID
-
-    var body: some View {
-        Label(title, systemImage: iconName)
-        
-        .contentTransition(.symbolEffect(.replace))
-        .font(.system(size: 20, weight: .bold).italic())
-        .scaleEffect(quickLogIsExpanded ? 1 : 0.45)
-        .opacity(quickLogIsExpanded ? 1 : 0)
-        .blur(radius: quickLogIsExpanded ? 0 : 12)
-        
-        .contentShape(Rectangle())
-        .allowsHitTesting(quickLogIsExpanded)
-    
-        .matchedTransitionSource(id: title, in: buttons)
-
-        .onTapGesture {
-            backgroundMode = .none
-            quickLogIsExpanded = false
-            
-            contributionManager.saveContribution(contributionTitle: title, contributionDate: Date(), contributionMedia: [], selectedType: type, contributionNotes: "Added via Quick Log")
-            
-        }
-        .position(x: quickLogIsExpanded ? xCoord : originXCoord,
-                  y: quickLogIsExpanded ? yCoord : originYCoord)
-        
-        .animation(.spring(response: 0.6, dampingFraction: 0.72, blendDuration: 0)
-            .delay(TimeInterval(delay)), value: quickLogIsExpanded)
     }
 }
 

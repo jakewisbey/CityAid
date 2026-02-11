@@ -11,7 +11,7 @@ struct OnboardingSheet: View {
                 .opacity(0.3)
             
             VStack(alignment: .leading) {
-                Spacer().frame(height: 50)
+                Spacer().frame(height: 30)
                 Text("Welcome to")
                     .font(.system(size: 30, weight: .bold))
                     .foregroundStyle(Color(.gray.opacity(0.5)))
@@ -20,18 +20,9 @@ struct OnboardingSheet: View {
                     .font(.system(size: 60, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.bottom, 10)
+                    .padding(.bottom, 45)
                 
-                Text("Quickly log and monitor your contributions, complete challenges to stay motivated, earn badges for milestones, and learn how every action you take makes a meaningful difference in your community")
-                    .font(.system(size: 12).italic())
-                    .foregroundStyle(.gray)
-                    .multilineTextAlignment(.center) // centers lines
-                    .lineLimit(nil) // allow unlimited lines
-                    .fixedSize(horizontal: false, vertical: true) // lets it expand vertically
-                    .padding(.bottom, 40)
-                    .frame(maxWidth: .infinity)
-                
-                VStack (spacing: 40){
+                VStack (spacing: 30) {
                     HStack {
                         Image(systemName: "building.2")
                             .font(.system(size: 50))
@@ -48,6 +39,23 @@ struct OnboardingSheet: View {
                     }
                     .padding(.horizontal, 20)
                     
+                    HStack {
+                        Image(systemName: "figure.run")
+                            .font(.system(size: 50))
+                            .foregroundStyle(.green)
+                        
+                        VStack (alignment: .leading, spacing: 4) {
+                            Text("QuickLog")
+                                .font(.system(size: 20, weight: .bold))
+                            Text("A faster, less interrupting way to log pre-defined contributions, accessed by swiping from the right edge of the screen")
+                                .font(.system(size: 12).italic())
+                                .foregroundStyle(.gray)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 80, alignment: .leading)
+
+                    }
+                    .padding(.horizontal, 20)
+
                     HStack {
                         Image(systemName: "medal")
                             .font(.system(size: 50))
@@ -91,8 +99,9 @@ struct OnboardingSheet: View {
                     .font(.system(size: 20, weight: .semibold))
                     .frame(width: 300, height: 50)
                     .glassEffect(.clear.interactive().tint(.blue))
-                    .padding(.top, 85)
+                    .padding(.top)
                 }
+                .padding(.top, 60)
                 .frame(maxWidth: .infinity, alignment: .center)
                 
             }

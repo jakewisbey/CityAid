@@ -6,7 +6,6 @@ import Combine
 struct ChallengesView: View {
     // User, contributions and managers
     @EnvironmentObject var user: UserData
-    //var contributions: FetchedResults<ContributionEntity>
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
     ) private var contributions: FetchedResults<ContributionEntity>
@@ -25,7 +24,7 @@ struct ChallengesView: View {
     @State private var pulse1: Bool = false
     @State private var pulse2: Bool = true
     let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
-
+    
     @Binding public var selectedLevelCard: UUID
     @State private var levelCardFrames: [UUID: CGRect] = [:]
     

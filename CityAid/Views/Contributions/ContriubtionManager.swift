@@ -4,10 +4,10 @@ import AVKit
 internal import CoreData
 
 class ContributionManager {
-    var context: NSManagedObjectContext
+    let context: NSManagedObjectContext
     var user: UserData
-    
-    init(context: NSManagedObjectContext, user: UserData) {
+
+    init(user: UserData, context: NSManagedObjectContext) {
         self.context = context
         self.user = user
     }
@@ -52,7 +52,8 @@ class ContributionManager {
         }
     }
     
-    func saveContribution(contributionTitle: String, contributionDate: Date, contributionMedia: [MediaItem], selectedType: TypeOfContribution, contributionNotes: String) {
+    func saveContribution(contributionTitle: String, contributionDate: Date, contributionMedia: [MediaItem], selectedType: TypeOfContribution, contributionNotes: String, showStreakAnimation: Binding<Bool>) {
+        
         let entity = ContributionEntity(context: context)
         entity.id = UUID()
         
@@ -72,9 +73,9 @@ class ContributionManager {
             entity.notes = contributionNotes
         }
         
-        var mediaData: [String] = []
         
         // handle media stuff
+        var mediaData: [String] = []
         for media in contributionMedia {
             // make files for the media stuff in the filemanager
             switch media {
@@ -92,20 +93,45 @@ class ContributionManager {
         }
         
         // convert to data and store
-        entity.media = try? JSONEncoder().encode(mediaData)
-        
+        do {
+            entity.media = try JSONEncoder().encode(mediaData)
+        } catch {
+            print("media encode failed", error)
+            entity.media = Data()
+        }
         
         let randomXp = Int.random(in: 4...8)
+        entity.xp = Int16(randomXp)
+        user.xp += randomXp
+        user.CalculateUserLevel()
+        
+        
         
         if !user.isStreakCompletedToday {
             user.isStreakCompletedToday = true
             user.streak += 1
         }
         
-        user.xp += randomXp
-        
-        user.CalculateUserLevel()
-        try? context.save()
+        /*
+         if user.isStreakCompletedToday && !user.playedStreakAnimation {
+         showStreakAnimation.wrappedValue = true
+         }
+         */
+        print("changedValues:", entity.changedValues())
+        print("id:", entity.id as Any)
+          print("date:", entity.date as Any)
+          print("type:", entity.type as Any)
+          print("xp:", entity.xp)
+          print("title:", entity.title as Any)
+          print("notes:", entity.notes as Any)
+          print("media is Data:", entity.media != nil)
+        do {
+            try context.save()
+        } catch let error as NSError {
+            print("Core Data save error:", error)
+            print("userInfo:", error.userInfo)
+            context.rollback() // important to discard the bad insert/update
+        }
     }
     
     func editContribution(contribution: ContributionEntity, contributionTitle: String, contributionDate: Date, contributionMedia: [MediaItem], selectedType: TypeOfContribution, contributionNotes: String) {
@@ -136,7 +162,13 @@ class ContributionManager {
         // convert to data and store
         contribution.media = try? JSONEncoder().encode(mediaData)
         
-        try? context.save()
+        do {
+            try context.save()
+        } catch let error as NSError {
+            print("Core Data save error:", error)
+            print("userInfo:", error.userInfo)
+            context.rollback() // important to discard the bad insert/update
+        }
     }
     
     func copyMediaToAppFolder(originalURL: URL) -> URL? {
@@ -173,7 +205,7 @@ class ContributionManager {
             print("Error saving image: \(error)")
             return nil
         }
-    }    
+    }
 }
 
 enum TypeOfContribution: String, Identifiable, Codable, CaseIterable{

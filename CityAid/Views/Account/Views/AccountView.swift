@@ -4,7 +4,7 @@ import SwiftUI
 struct AccountView: View {
     // User, contributions and managers
     @EnvironmentObject var user: UserData
-    // var contributions: FetchedResults<ContributionEntity>
+
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
     ) private var contributions: FetchedResults<ContributionEntity>
@@ -19,7 +19,6 @@ struct AccountView: View {
     @State private var path = NavigationPath()
     @State private var showingStreakInfo = false;
     @State private var streakText = ""
-
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -54,9 +53,13 @@ struct AccountView: View {
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white.opacity(0.5))
                 ) {
-                    NavigationLink("Change possible challenge types"){
+                    NavigationLink("Select possible challenge types"){
                         ChallengeOptionsView()
                     }
+                    NavigationLink("Change QuickLog count"){
+                        QuickLogCountView()
+                    }
+
                 }
 
                 Section(header: Text("Stats")
@@ -151,6 +154,18 @@ struct AccountView: View {
                                 user.isStreakCompletedToday = false
                                 user.playedStreakAnimation = false
                                 user.hasOpenedBefore = false
+                                
+                                // Reset userdefaults dictionary
+                                UserDefaults.standard.removeObject(forKey: "quickLogKey")
+                                
+                                let defaults: [String: Int] = [
+                                    "Litter-Picking": 0,
+                                    "Gave up my seat": 0,
+                                    "Helped with directions": 0,
+                                    "Took someone's trash": 0,
+                                    "Helped an animal": 0,
+                                ]
+                                UserDefaults.standard.set(defaults, forKey: "quickLogKey")
                             }
                     }
                 }
@@ -194,6 +209,54 @@ struct AccountView: View {
     }
     
 }
+
+struct QuickLogCountView: View {
+    @State private var quickLogs: [String: Int] = [:]
+
+    var body: some View {
+        List {
+            Section(
+                header: Text("QuickLog Counts")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.white.opacity(0.5)),
+            footer: Text("Change the number of times you have completed a specific QuickLog. This will update the title of the QuickLog when you select it.")
+            ) {
+                ForEach(quickLogs.keys.sorted(), id: \.self) { key in
+                    HStack {
+                        Text(key)
+                        Spacer()
+                        Text("\(quickLogs[key] ?? 0)")
+                    }
+                }
+                
+                Button("Reload") {
+                    quickLogs = UserDefaults.standard.object(forKey: "quickLogKey") as? [String:Int] ?? quickLogs
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("QuickLog Count")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            quickLogs = UserDefaults.standard.object(forKey: "quickLogKey") as? [String: Int] ?? [:]
+        }
+    }
+
+}
+
+#Preview {
+    QuickLogCountView()
+}
+
+
+
+
+
+
+
+
+
+
 
 #Preview {
     AccountView()

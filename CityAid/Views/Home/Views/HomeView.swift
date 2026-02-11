@@ -7,6 +7,7 @@ struct HomeView: View{
     @Binding var backgroundMode : BackgroundMode
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.managedObjectContext) private var context
+    @Binding var showStreakAnimation: Bool
 
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
@@ -25,7 +26,7 @@ struct HomeView: View{
                             .opacity(0.6)
 
                         ForEach(contributions) { item in
-                            ContributionRow(user: user, item: item, backgroundMode: $backgroundMode)
+                            ContributionRow(user: user, item: item, backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
                                 .transition(.opacity.combined(with: .scale))
                         }
                     }
@@ -50,6 +51,7 @@ struct ContributionRow: View, Identifiable {
     let user: UserData
     var item: ContributionEntity
     @Binding public var backgroundMode: BackgroundMode
+    @Binding public var showStreakAnimation: Bool
     @State private var contributionToEdit: ContributionEntity? = nil
     @Environment(\.managedObjectContext) private var context
     @Namespace var animationNamespace
@@ -128,20 +130,35 @@ struct ContributionRow: View, Identifiable {
             duplicateContribution.date = Date()
         }
         
-        let randomXP = Int.random(in: 3...6)
-        user.xp += randomXP
+        duplicateContribution.xp = contribution.xp
+        user.xp += Int(duplicateContribution.xp)
         
-        try? context.save()
+        do {
+            try context.save()
+        } catch let error as NSError {
+            print("Core Data save error:", error)
+            print("userInfo:", error.userInfo)
+            context.rollback() // important to discard the bad insert/update
+        }
     }
-    
+        
     func DeleteContribution (contribution: ContributionEntity) {
+        // remove 2/3 of previously awarded xp from user.xp, and recalculate level in case it goes negative
+        user.xp -= ( 2 * Int(contribution.xp) / 3 )
+        user.CalculateUserLevel()
         context.delete(contribution)
-        try? context.save()
+        do {
+            try context.save()
+        } catch let error as NSError {
+            print("Core Data save error:", error)
+            print("userInfo:", error.userInfo)
+            context.rollback() // important to discard the bad insert/update
+        }
     }
 }
 
 
 #Preview {
-    HomeView(backgroundMode: .constant(.none))
+    HomeView(backgroundMode: .constant(.none), showStreakAnimation: .constant(false))
 }
 

@@ -53,7 +53,7 @@ struct EditContributionSheet: View {
     }
     
     var contributionManager: ContributionManager {
-        ContributionManager(context: context, user: user)
+        ContributionManager(user: user, context: context)
     }
     
     @State private var contributionTitle: String = ""
