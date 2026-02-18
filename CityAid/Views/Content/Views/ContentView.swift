@@ -87,6 +87,7 @@ struct ContentView: View {
             Color.black
                 .opacity(backgroundMode == .expanded ? 0.5 : 0)
                 .ignoresSafeArea()
+                .allowsHitTesting(backgroundMode == .expanded)
                 .onTapGesture {
                     withAnimation(.spring()) { backgroundMode = .none; isExpanded = false; quickLogIsExpanded = false }
                 }
@@ -110,6 +111,7 @@ struct ContentView: View {
                 .frame(width: 1600, height: 1600)
                 .clipShape(Circle())
                 .opacity(backgroundMode == .quickLog ? 1 : 0)
+                .allowsHitTesting(backgroundMode == .quickLog)
                 .onTapGesture {
                     withAnimation(.spring()) { backgroundMode = .none; quickLogIsExpanded = false }
                 }
@@ -411,3 +413,4 @@ enum BackgroundMode {
 #Preview {
     ContentView()
 }
+
