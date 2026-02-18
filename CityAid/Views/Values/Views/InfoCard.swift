@@ -8,6 +8,7 @@ struct InfoCard: View {
     let caption: String
     let cardSelected: TypeOfContribution
     let isSelected: Bool
+    let infoNamespace: Namespace.ID
     
     @State private var isShowingSourcesPopover: Bool = false
     
@@ -30,8 +31,10 @@ struct InfoCard: View {
                         )
                     )
                     .onTapGesture() {
-                        if isSelected { infoSelectedType = cardSelected }
+                        if isSelected {
+                            infoSelectedType = cardSelected
                             backgroundMode = .expanded
+                        }
                     }
             }
             .cornerRadius(20)
@@ -85,6 +88,7 @@ struct InfoCard: View {
         .saturation(isSelected ? 1.0 : 0.0)
         .animation(.spring(response: 0.35, dampingFraction: 0.8, blendDuration: 0.2), value: isSelected)
         .reportCardFrame(cardSelected, in: .named("cardScroll"))
+        .matchedTransitionSource(id: title, in: infoNamespace)
     }
     
 }

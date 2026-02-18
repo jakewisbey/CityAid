@@ -126,7 +126,7 @@ class ContributionManager {
         } catch let error as NSError {
             print("Core Data save error:", error)
             print("userInfo:", error.userInfo)
-            context.rollback() // important to discard the bad insert/update
+            context.rollback()
         }
     }
     

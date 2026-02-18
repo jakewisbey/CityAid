@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreMotion
 internal import CoreData
 
 // MARK: - HomeView
@@ -8,43 +9,180 @@ struct HomeView: View{
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.managedObjectContext) private var context
     @Binding var showStreakAnimation: Bool
-
+    
+    let motionManager = CMMotionManager()
+    @State private var stars: [NSManagedObjectID: Star] = [:]
+    let starColours: [Color] = [.yellow, .white]
+    
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
     ) private var contributions: FetchedResults<ContributionEntity>
     
     var body: some View {
-        GeometryReader { geo in
-            ScrollView {
+        GeometryReader { proxy in
+            ScrollView (showsIndicators: false) {
                 ZStack(alignment: .topLeading) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("CityAid")
-                            .font(.system(size: 44, weight: .bold))
-                            .foregroundStyle(.white)
-                        Text("building a brighter city for everyone")
-                            .foregroundStyle(.white)
-                            .opacity(0.6)
-
-                        ForEach(contributions) { item in
-                            ContributionRow(user: user, item: item, backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
-                                .transition(.opacity.combined(with: .scale))
+                    Image("BgImage")
+                        .resizable()
+                        .ignoresSafeArea()
+                        .scaledToFill()
+                    
+                    ForEach(contributions, id: \.objectID) { contribution in
+                        if let star = stars[contribution.objectID] {
+                            StarView(star: star)
+                                .transaction { t in
+                                    t.disablesAnimations = true
+                                }
+                            
                         }
                     }
-                    .animation(.spring(), value: contributions.map { $0.objectID })
-                    .padding(16)
-                    .padding(.top, 30)
                 }
+                
+                VStack(spacing: 10) {
+                    ForEach(contributions) { item in
+                        ContributionRow(user: user, item: item, backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
+                            .transition(.opacity.combined(with: .scale))
+                    }
+                }
+                .padding(16)
             }
+            .animation(.spring(), value: contributions.map { $0.objectID })
+            .ignoresSafeArea()
             .ignoresSafeArea(.keyboard)
+            .onAppear {
+                generatePositions(in: proxy.size)
+            }
+            .onChange(of: contributions.count) { _, _ in
+                generatePositions(in: proxy.size)
+            }
+            .onDisappear {
+                motionManager.stopDeviceMotionUpdates()
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("CityAid")
+                    .font(.system(size: 44, weight: .bold))
+                    .foregroundStyle(.white)
+                Text("building a brighter city for everyone")
+                    .foregroundStyle(.white)
+                    .opacity(0.6)
+                
+            }
+            .padding()
+            
         }
-        .background(LinearGradient (colors: [Color(red: 0/255, green: 0/255, blue: 100/255), .black], startPoint:. top, endPoint: .bottom))
+        .backgroundStyle(.black)
     }
-
+    
     
     func CountContributionsOfType(_ type: String) -> Int {
         contributions.filter { $0.type == type }.count
     }
+    
+    func randomPosition(in size: CGSize) -> CGPoint {
+        CGPoint(
+            x: size.width * CGFloat.random(in: 0...1),
+            y: size.height * CGFloat.random(in: 0.2...0.75)
+        )
+    }
+    
+    func generatePositions(in size: CGSize) {
+        for contribution in contributions {
+            if stars[contribution.objectID] == nil {
+                let position = randomPosition(in: size)
+                let randomSize = CGFloat(Float.random(in: 10...30))
+                let floatAmplifier = Bool.random()
+                    ? CGFloat.random(in: -5...2)
+                    : CGFloat.random(in: 2...5)
+                
+                stars[contribution.objectID] = Star(
+                    basePosition: position,
+                    width: randomSize*0.7,
+                    height: randomSize,
+                    color: starColours.randomElement()!,
+                    opacity: Float.random(in: 0.6...1),
+                    floatAmplifier: floatAmplifier
+                )
+            }
+        }
+    }
 }
+
+struct Star {
+    var basePosition: CGPoint
+    let width: CGFloat
+    let height: CGFloat
+    let color: Color
+    let opacity: Float
+    let floatAmplifier: CGFloat
+}
+
+struct StarView: View {
+    let star: Star
+            
+    @State var isInitialised: Bool = false
+    
+    @State var isTapped: Bool = false
+    @State var glowScale: CGFloat = 1
+    @State var rotation: Double = 135
+    @State var scale: CGFloat = 0.5
+    
+    var body: some View {
+        TimelineView(.animation) { timeline in
+            let time = timeline.date.timeIntervalSinceReferenceDate
+            let offset = sin(time * 0.5 + Double(star.basePosition.x)) * star.floatAmplifier
+            
+            ZStack {
+                RadialGradient(
+                    gradient: Gradient(colors: [star.color.opacity(0.2), .black.opacity(0)]),
+                    center: .center,
+                    startRadius: 0,
+                    endRadius: star.width
+                )
+                .scaleEffect(glowScale)
+                .onAppear {
+                    let delay = Double.random(in: 0...5)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                        
+                        withAnimation(.easeInOut(duration: 10).repeatForever(autoreverses: true)) {
+                            glowScale = 1.2
+                        }
+                    }
+                }
+                
+                Image("Star")
+                    .renderingMode(.template)
+                    .resizable()
+                    .frame(width: star.width, height: star.height)
+                    .foregroundStyle(star.color.opacity(Double(star.opacity)))
+                    .rotationEffect(.degrees(rotation))
+                    .scaleEffect(scale)
+            }
+            .position(
+                x: star.basePosition.x,
+                y: star.basePosition.y + offset
+            )
+            .onAppear {
+                
+                if !isInitialised {
+                    isInitialised = true
+                    
+                    
+                    // spin in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + star.basePosition.y / 2000) {
+                        withAnimation(.interpolatingSpring(stiffness: 100, damping: 10)) {
+                            rotation = 0
+                            scale = 1
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
 
 struct ContributionRow: View, Identifiable {
     let id = UUID()
@@ -163,4 +301,3 @@ struct ContributionRow: View, Identifiable {
 #Preview {
     HomeView(backgroundMode: .constant(.none), showStreakAnimation: .constant(false))
 }
-

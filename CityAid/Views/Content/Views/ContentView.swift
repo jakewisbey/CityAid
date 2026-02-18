@@ -28,6 +28,7 @@ struct ContentView: View {
     
     // Animation handling
     @Namespace private var buttons
+    @Namespace private var infoNamespace
     @State private var isExpanded: Bool = false
     @State private var selectedBubbleID: String = ""
     @State private var backgroundMode: BackgroundMode = .none
@@ -64,7 +65,7 @@ struct ContentView: View {
                 ChallengesView(selectedLevelCard: $levelCardSelected, selectedTotalContributionCard: $totalContributionCardSelected)
                     .tabItem { Label("Challenges", systemImage: "crown") }
                     .tag(Tab.challenges)
-                ValuesView(cardSelected: $cardSelected, infoSelectedType: $infoSelectedType, backgroundMode: $backgroundMode)
+                ValuesView(cardSelected: $cardSelected, infoSelectedType: $infoSelectedType, backgroundMode: $backgroundMode, infoNamespace: infoNamespace)
                     .tabItem { Label("Values", systemImage: "star") }
                     .tag(Tab.values)
                 AccountView()
@@ -334,9 +335,9 @@ struct ContentView: View {
                 OnboardingSheet()
             }
 
-            .sheet(item: $infoSelectedType, onDismiss: {  backgroundMode = .none }) { type in
+            .sheet(item: $infoSelectedType, onDismiss: { backgroundMode = .none }) { type in
                 InfoSheet(type: type)
-                    .navigationTransition(.zoom(sourceID: "transition-id", in: buttons))
+                    .navigationTransition(.zoom(sourceID: type.rawValue, in: infoNamespace))
             }
             .sheet(item: $selectedType, onDismiss: { backgroundMode = .none } ) { type in
                 NewContributionSheet(type: type, user: user, backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
@@ -368,7 +369,6 @@ struct ContentView: View {
                     // swipe from right to left
                     if value.startLocation.x > UIScreen.main.bounds.width * 0.9 &&
                        value.translation.width < -50 {
-                        print("swiped from right edge")
                         quickLogIsExpanded = true
                         backgroundMode = .quickLog
                     }
