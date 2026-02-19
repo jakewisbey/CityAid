@@ -37,15 +37,7 @@ final class UserData: ObservableObject {
             }
         }
     }
-    /*
-    var quickLogs: [String : Int] = [
-        "1": 0,
-        "2": 0,
-        "3": 0,
-        "4": 0,
-        "5": 0,
-    ]
-    */
+
     var quickLogs: [String: Int] = UserDefaults.standard.object(forKey: "quickLogKey") as? [String: Int] ?? [
         "Litter-Picking": 0,
         "Gave up my seat": 0,

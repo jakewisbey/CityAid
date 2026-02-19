@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import CoreLocation
 import PhotosUI
 internal import CoreData
 
@@ -42,6 +41,7 @@ struct ContentView: View {
     // Animation and Onboarding
     @State private var showStreakAnimation: Bool = false
     @State private var showOnboarding: Bool = false
+    @State private var popped = false
 
     // Selected Types
     @State private var selectedType: TypeOfContribution? = nil
@@ -223,7 +223,7 @@ struct ContentView: View {
                             )
                         }
                         
-                        if !isExpanded && !valuesTabActive {
+                        if !isExpanded && !valuesTabActive && !popped {
                             QuickLogBubble(
                                            title: "Litter-Picking",
                                            type: .cleanliness,
@@ -313,6 +313,7 @@ struct ContentView: View {
                                 .opacity(!quickLogIsExpanded ? 1 : 0)
                                 .allowsHitTesting(!quickLogIsExpanded)
                                 .onTapGesture {
+                                    popped = false
                                     if !valuesTabActive {
                                         withAnimation {
                                             isExpanded.toggle()
@@ -324,6 +325,40 @@ struct ContentView: View {
                                     }
                                 }
                         }
+                    }
+                    
+                    if selectedTab == .home {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .foregroundStyle(.ultraThinMaterial)
+                                .blur(radius: quickLogIsExpanded ? 10 : 0)
+                                .frame(width: 100, height: 100)
+                                .offset(x: quickLogIsExpanded || isExpanded ? 10 : 0)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.5), value: popped)
+                                .onTapGesture {
+                                    withAnimation {
+                                        popped = true
+                                        backgroundMode = .expanded
+                                    }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                        withAnimation {
+                                            popped = false
+                                            
+                                            if !isExpanded { backgroundMode = .none }
+                                        }
+                                    }
+                                }
+                                .allowsHitTesting(!popped && !quickLogIsExpanded)
+                            
+                            Text("Swipe left!")
+                                .font(.system(size: 25, weight: .bold))
+                                .opacity(popped ? 1 : 0)
+                                .offset(x: popped ? -120 : -70)
+                                .blur(radius: popped ? 0 : 10)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.5), value: popped)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .position(x: !popped ? geo.size.width * 1.1 : geo.size.width * 1.08, y: geo.size.height/2)
                     }
                 }
             }
@@ -370,7 +405,7 @@ struct ContentView: View {
                 .onEnded { value in
                     // swipe from right to left
                     if value.startLocation.x > UIScreen.main.bounds.width * 0.9 &&
-                       value.translation.width < -50 {
+                        value.translation.width < -50 && !popped && !isExpanded && selectedTab == .home {
                         quickLogIsExpanded = true
                         backgroundMode = .quickLog
                     }

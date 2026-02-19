@@ -150,7 +150,7 @@ class ChallengeManager {
         if lastWeek != thisWeek {
             for _ in user.weeklyChallenges {
                 // Evaluate the previous week by passing a date from last week
-                let thisMonday = cal.nextDate(
+                _ = cal.nextDate(
                     after: now,
                     matching: DateComponents(hour: 0, minute: 0, weekday: 2),
                     matchingPolicy: .nextTime,

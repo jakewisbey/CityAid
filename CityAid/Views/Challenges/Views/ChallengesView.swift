@@ -36,38 +36,39 @@ struct ChallengesView: View {
     
     var body: some View {
         ZStack {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Challenges")
-                    .font(.system(size: 44, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                HStack {
-                    Text("Daily")
-                        .font(.system(size: 24, weight: .bold))
+            VStack (spacing: 0) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Challenges")
+                        .font(.system(size: 44, weight: .bold))
                         .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 14))
-                        .frame(width: 25, height: 25)
-                        .glassEffect(.clear.interactive())
-                        .onTapGesture {
-                            self.isShowingDailyPopover = true
-                        }
-                        .popover(
-                            isPresented: $isShowingDailyPopover, arrowEdge: .top
-                        ) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Daily Challenges")
-                                    .font(.system(size: 26, weight: .bold))
-                                Text("Daily challenges encourage you to contribution to your community at least one time a day.\n\nComplete a challenge each day to keep your daily streak!")
+                    HStack {
+                        Text("Daily")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundStyle(.white)
+                        
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 14))
+                            .frame(width: 25, height: 25)
+                            .glassEffect(.clear.interactive())
+                            .onTapGesture {
+                                self.isShowingDailyPopover = true
                             }
-                            .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
-                            .padding()
-                            .frame(width: 340, height: 210)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    
+                            .popover(
+                                isPresented: $isShowingDailyPopover, arrowEdge: .top
+                            ) {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Daily Challenges")
+                                        .font(.system(size: 26, weight: .bold))
+                                    Text("Daily challenges encourage you to contribution to your community at least one time a day.\n\nComplete a challenge each day to keep your daily streak!")
+                                }
+                                .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
+                                .padding()
+                                .frame(width: 340, height: 210)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        
                         Text("⏳")
                             .font(.system(size: 14, weight: .regular))
                             .scaleEffect(pulse1 ? 1.1 : 1)
@@ -83,216 +84,221 @@ struct ChallengesView: View {
                                     }
                                 }
                             }
-                    
-                    
-                    Text((challengeManager.calculateTimeInterval(nextReset: challengeManager.nextDailyReset())))
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundStyle(.gray.opacity(0.9))
-                        .contentTransition(.numericText())
-                    
-                    Image(systemName: "dice")
-                        .frame(width: 40, height: 40)
-                        .glassEffect(.clear.interactive().tint(.blue))
-                        .onTapGesture {
-                            challengeManager.rerollChallenges()
-                        }
                         
-                     
-                }
-                .frame(maxWidth: .infinity)
-                
-                DailyChallengeCard(user: user, contributions: contributions)
-                Spacer()
-                
-                HStack {
-                    Text("Weekly")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundStyle(.white)
-
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 14))
-                        .frame(width: 25, height: 25)
-                        .glassEffect(.clear.interactive())
-                        .onTapGesture {
-                            self.isShowingWeeklyPopover = true
-                        }
-                        .popover(
-                            isPresented: $isShowingWeeklyPopover, arrowEdge: .top
-                        ) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Weekly Challenges")
-                                    .font(.system(size: 26, weight: .bold))
-                                Text("Weekly challenges are harder, but more rewarding than daily challenges, designed to encourage you to contribute even more to your community.\n\nTry to complete all 3 each week to earn extra xp!")
+                        
+                        Text((challengeManager.calculateTimeInterval(nextReset: challengeManager.nextDailyReset())))
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundStyle(.gray.opacity(0.9))
+                            .contentTransition(.numericText())
+                        
+                        Image(systemName: "dice")
+                            .frame(width: 40, height: 40)
+                            .glassEffect(.clear.interactive().tint(.blue))
+                            .onTapGesture {
+                                challengeManager.rerollChallenges()
                             }
-                            .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
-                            .padding()
-                            .frame(width: 340, height: 250)
+                        
+                        
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    Text("⏳")
-                        .font(.system(size: 14, weight: .regular))
-                        .scaleEffect(pulse2 ? 1.1 : 1)
-                        .animation(.interpolatingSpring(stiffness: 150, damping: 10), value: pulse2)
-                        .padding(.trailing, -5)
-                        .onReceive(timer) { _ in
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                withAnimation {
-                                    pulse2 = true
-                                }
+                    .frame(maxWidth: .infinity)
+                    
+                    DailyChallengeCard(user: user, contributions: contributions)
+                    Spacer()
+                    
+                    HStack {
+                        Text("Weekly")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundStyle(.white)
+                        
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 14))
+                            .frame(width: 25, height: 25)
+                            .glassEffect(.clear.interactive())
+                            .onTapGesture {
+                                self.isShowingWeeklyPopover = true
                             }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation {
-                                    pulse2 = false
+                            .popover(
+                                isPresented: $isShowingWeeklyPopover, arrowEdge: .top
+                            ) {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Weekly Challenges")
+                                        .font(.system(size: 26, weight: .bold))
+                                    Text("Weekly challenges are harder, but more rewarding than daily challenges, designed to encourage you to contribute even more to your community.\n\nTry to complete all 3 each week to earn extra xp!")
                                 }
-                            }
-                        }
-
-                    Text(challengeManager.calculateTimeInterval(nextReset: challengeManager.nextWeeklyReset()))
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundStyle(.gray.opacity(0.9))
-                        .contentTransition(.numericText())
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                
-                HStack {
-                    ForEach(user.weeklyChallenges, id: \.id) { challenge in
-                        WeeklyChallengeCard(challenge: challenge, progress: challengeManager.calculateChallengeProgress(.weekly, challenge.target, challenge.contributionType, contributions))
-                    }
-                }
-                Spacer()
-                
-                HStack {
-                    VStack (alignment: .leading) {
-                        HStack {
-                            Text("Milestones")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundStyle(.white)
-                                .frame(alignment: .leading)
-
-                            Image(systemName: "info.circle")
-                                .font(.system(size: 14))
-                                .frame(width: 25, height: 25)
-                                .glassEffect(.clear.interactive())
-                                .onTapGesture {
-                                    self.isShowingMilestonesPopover = true
-                                }
-                                .popover(
-                                    isPresented: $isShowingMilestonesPopover, arrowEdge: .bottom
-                                ) {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("Milestones")
-                                            .font(.system(size: 26, weight: .bold))
-                                        Text("Milestones are a great way to celebrate your achievements, split up into user level and total contributions.\n\nEach milestone awards you with a unique badge!")
-                                    }
-                                    .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
-                                    .padding()
-                                    .frame(width: 340, height: 210)
+                                .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
+                                .padding()
+                                .frame(width: 340, height: 250)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
-
-                        }
-                        let options = ["User Level", "Contributions"]
                         
-                        Picker("", selection: $selectedMilestoneType) {
-                            ForEach(0..<options.count, id: \.self) { index in
-                                Text(options[index]).tag(index)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .frame(maxWidth: 300)
-                        .padding(.leading, 35)
-                                            
-                        Spacer()
-                        
-                        ZStack {
-                            GeometryReader { proxy in
-                                let horizontalPadding = max((proxy.size.width - 200) / 2, 0)
-
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack {
-                                        ForEach(levelMilestones) { milestone in
-                                            LevelMilestoneCard(id: milestone.id, milestone: milestone, title: milestone.title, caption: milestone.description, badge: milestone.badgePath, selectedLevelCard: selectedLevelCard, user: user)
-                                            }
+                        Text("⏳")
+                            .font(.system(size: 14, weight: .regular))
+                            .scaleEffect(pulse2 ? 1.1 : 1)
+                            .animation(.interpolatingSpring(stiffness: 150, damping: 10), value: pulse2)
+                            .padding(.trailing, -5)
+                            .onReceive(timer) { _ in
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                    withAnimation {
+                                        pulse2 = true
                                     }
-                                    .scrollTargetLayout()
-                                    .padding(.trailing, horizontalPadding)
                                 }
-                                .scrollTargetBehavior(.viewAligned)
-                                .coordinateSpace(name: "levelCardScroll")
-                                .overlay(
-                                    GeometryReader { scrollProxy in
-                                        Color.clear
-                                            .onAppear {
-                                                let rect = scrollProxy.frame(in: .named("levelCardScroll"))
-                                                viewport = rect
-                                            }
-                                            .onChange(of: scrollProxy.size) { _, _ in
-                                                let rect = scrollProxy.frame(in: .named("levelCardScroll"))
-                                                viewport = rect
-                                            }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    withAnimation {
+                                        pulse2 = false
                                     }
-                                    .allowsHitTesting(false)
-                                )
+                                }
                             }
-                            .zIndex(selectedMilestoneType == 0 ? 1 : -1)
-                            .scaleEffect(selectedMilestoneType == 0 ? 1 : 0.7)
-                            .opacity(selectedMilestoneType == 0 ? 1 : 0)
-                            .animation(.spring(duration: 0.3), value: selectedMilestoneType)
-                            .padding(.top, 12)
-                            .onPreferenceChange(LevelCardFramesKey.self) { frames in
-                                levelCardFrames = frames
-                                updateSelectedLevelCardByCenter()
+                        
+                        Text(challengeManager.calculateTimeInterval(nextReset: challengeManager.nextWeeklyReset()))
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundStyle(.gray.opacity(0.9))
+                            .contentTransition(.numericText())
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    HStack {
+                        ForEach(user.weeklyChallenges, id: \.id) { challenge in
+                            WeeklyChallengeCard(challenge: challenge, progress: challengeManager.calculateChallengeProgress(.weekly, challenge.target, challenge.contributionType, contributions))
+                        }
+                    }
+                    Spacer()
+                    
+                    
+                    HStack {
+                        VStack (alignment: .leading) {
+                            HStack {
+                                Text("Milestones")
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .frame(alignment: .leading)
+                                
+                                Image(systemName: "info.circle")
+                                    .font(.system(size: 14))
+                                    .frame(width: 25, height: 25)
+                                    .glassEffect(.clear.interactive())
+                                    .onTapGesture {
+                                        self.isShowingMilestonesPopover = true
+                                    }
+                                    .popover(
+                                        isPresented: $isShowingMilestonesPopover, arrowEdge: .bottom
+                                    ) {
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            Text("Milestones")
+                                                .font(.system(size: 26, weight: .bold))
+                                            Text("Milestones are a great way to celebrate your achievements, split up into user level and total contributions.\n\nEach milestone awards you with a unique badge!")
+                                        }
+                                        .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
+                                        .padding()
+                                        .frame(width: 340, height: 210)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                
                             }
-
+                            let options = ["User Level", "Contributions"]
                             
-                            GeometryReader { proxy in
-                                let horizontalPadding = max((proxy.size.width - 200) / 2, 0)
-
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack {
-                                        ForEach(totalContributionMilestones) { milestone in
-                                            TotalContributionMilestoneCard(id: milestone.id, milestone: milestone, title: milestone.title, caption: milestone.description, selectedTotalContributionCard: selectedTotalContributionCard, contributions: contributions)
-                                            }
-                                    }
-                                    .scrollTargetLayout()
-                                    .padding(.trailing, horizontalPadding)
+                            Picker("", selection: $selectedMilestoneType) {
+                                ForEach(0..<options.count, id: \.self) { index in
+                                    Text(options[index]).tag(index)
                                 }
-                                .scrollTargetBehavior(.viewAligned)
-                                .coordinateSpace(name: "totalContributionCardScroll")
-                                .overlay(
-                                    GeometryReader { scrollProxy in
-                                        Color.clear
-                                            .onAppear {
-                                                let rect = scrollProxy.frame(in: .named("totalContributionCardScroll"))
-                                                viewport = rect
-                                            }
-                                            .onChange(of: scrollProxy.size) { _, _ in
-                                                let rect = scrollProxy.frame(in: .named("totalContributionCardScroll"))
-                                                viewport = rect
-                                            }
+                            }
+                            .pickerStyle(.segmented)
+                            .frame(maxWidth: 300)
+                            .padding(.leading, 35)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+                
+                VStack {
+                    ZStack {
+                        GeometryReader { proxy in
+                            let horizontalPadding = max((proxy.size.width - 200) / 2, 0)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack {
+                                    ForEach(levelMilestones) { milestone in
+                                        LevelMilestoneCard(id: milestone.id, milestone: milestone, title: milestone.title, caption: milestone.description, badge: milestone.badgePath, selectedLevelCard: selectedLevelCard, user: user)
                                     }
+                                }
+                                .scrollTargetLayout()
+                                .padding(.trailing, horizontalPadding)
+                            }
+                            .scrollTargetBehavior(.viewAligned)
+                            .coordinateSpace(name: "levelCardScroll")
+                            .overlay(
+                                GeometryReader { scrollProxy in
+                                    Color.clear
+                                        .onAppear {
+                                            let rect = scrollProxy.frame(in: .named("levelCardScroll"))
+                                            viewport = rect
+                                        }
+                                        .onChange(of: scrollProxy.size) { _, _ in
+                                            let rect = scrollProxy.frame(in: .named("levelCardScroll"))
+                                            viewport = rect
+                                        }
+                                }
                                     .allowsHitTesting(false)
-                                )
+                            )
+                        }
+                        .zIndex(selectedMilestoneType == 0 ? 1 : -1)
+                        .scaleEffect(selectedMilestoneType == 0 ? 1 : 0.7)
+                        .opacity(selectedMilestoneType == 0 ? 1 : 0)
+                        .animation(.spring(duration: 0.3), value: selectedMilestoneType)
+                        .padding(.top, 12)
+                        .onPreferenceChange(LevelCardFramesKey.self) { frames in
+                            levelCardFrames = frames
+                            updateSelectedLevelCardByCenter()
+                        }
+                        
+                        
+                        GeometryReader { proxy in
+                            let horizontalPadding = max((proxy.size.width - 200) / 2, 0)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack {
+                                    ForEach(totalContributionMilestones) { milestone in
+                                        TotalContributionMilestoneCard(id: milestone.id, milestone: milestone, title: milestone.title, caption: milestone.description, selectedTotalContributionCard: selectedTotalContributionCard, contributions: contributions)
+                                    }
+                                }
+                                .scrollTargetLayout()
+                                .padding(.trailing, horizontalPadding)
                             }
-                            .zIndex(selectedMilestoneType == 0 ? -1 : 1)
-                            .scaleEffect(selectedMilestoneType == 0 ? 0.7 : 1)
-                            .opacity(selectedMilestoneType == 0 ? 0 : 1)
-                            .animation(.spring(duration: 0.3), value: selectedMilestoneType)
-                            .padding(.top, 12)
-                            .onPreferenceChange(TotalContributionCardFramesKey.self) { frames in
-                                totalContributionCardFrames = frames
-                                updateSelectedTotalContributionCardByCenter()
-                            }
+                            .scrollTargetBehavior(.viewAligned)
+                            .coordinateSpace(name: "totalContributionCardScroll")
+                            .overlay(
+                                GeometryReader { scrollProxy in
+                                    Color.clear
+                                        .onAppear {
+                                            let rect = scrollProxy.frame(in: .named("totalContributionCardScroll"))
+                                            viewport = rect
+                                        }
+                                        .onChange(of: scrollProxy.size) { _, _ in
+                                            let rect = scrollProxy.frame(in: .named("totalContributionCardScroll"))
+                                            viewport = rect
+                                        }
+                                }
+                                    .allowsHitTesting(false)
+                            )
+                        }
+                        .zIndex(selectedMilestoneType == 0 ? -1 : 1)
+                        .scaleEffect(selectedMilestoneType == 0 ? 0.7 : 1)
+                        .opacity(selectedMilestoneType == 0 ? 0 : 1)
+                        .animation(.spring(duration: 0.3), value: selectedMilestoneType)
+                        .padding(.top, 12)
+                        .onPreferenceChange(TotalContributionCardFramesKey.self) { frames in
+                            totalContributionCardFrames = frames
+                            updateSelectedTotalContributionCardByCenter()
                         }
                     }
                 }
-                .frame(maxWidth: .infinity)
             }
-            .padding(16)
-            .padding(.bottom, 150)
         }
     }
+    
+    
     
     private func updateSelectedLevelCardByCenter() {
         guard !viewport.isEmpty else { return }
