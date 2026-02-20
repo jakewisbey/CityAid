@@ -123,30 +123,26 @@ struct StarTappedView: View {
     let contribution: ContributionEntity
     
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 12) {
-                Text(contribution.type ?? "")
-                    .font(.headline)
+        ZStack(alignment: .topLeading) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(contribution.title ?? "Unknown")
+                    .font(.system(size: 25, weight: .bold))
+                
+                Text(contribution.type ?? TypeOfContribution.other.rawValue)
+                    .font(.system(size: 10, weight: .semibold).italic())
+                    .foregroundStyle(.gray)
+
                 Text(contribution.date ?? .now, style: .date)
-                    .font(.subheadline)
-                    .opacity(0.6)
+                    .font(.system(size: 10).italic())
+                    .foregroundStyle(.gray)
+                
+                Spacer()
             }
             .padding(20)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 struct Star {

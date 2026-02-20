@@ -72,7 +72,6 @@ struct ContentView: View {
                     .tabItem { Label("Account", systemImage: "person.crop.circle.fill")}
                     .tag(Tab.account)
             }
-            .environmentObject(user)
             
             .onChange(of: selectedTab) { oldValue, newValue in
                 if newValue == .values {
@@ -96,6 +95,7 @@ struct ContentView: View {
             LinearGradient(colors: [Color(red: 0/255, green: 0/255, blue: 30/255), .black.opacity(0.3)], startPoint: .top, endPoint: .center)
                 .opacity(backgroundMode == .sheet ? 1 : 0)
                 .ignoresSafeArea()
+                .allowsHitTesting(backgroundMode == .sheet)
                 .onTapGesture {
                     withAnimation(.spring()) { backgroundMode = .none }
                 }
@@ -301,29 +301,42 @@ struct ContentView: View {
                         }
                         
                         if !quickLogIsExpanded {
-                            Image(systemName: valuesTabActive ? "info.circle.text.page" : "plus")
-                                .contentTransition(.symbolEffect(.replace))
-                                .font(.system(size: 36))
-                                .frame(width: 70, height: 70)
-                                .contentShape(Rectangle())
-                                .glassEffect(.clear.interactive().tint(.blue))
-
+                            ZStack {
+                                RadialGradient(
+                                    gradient: Gradient(colors: [
+                                        .blue.opacity(0.2), .clear
+                                    ]),
+                                    center: .center,
+                                    startRadius: 0,
+                                    endRadius: 60
+                                )
+                                .frame(width: 120, height: 120)
                                 .clipShape(Circle())
-                                .position(x: geo.size.width * 0.5, y: geo.size.height * 0.94)
-                                .opacity(!quickLogIsExpanded ? 1 : 0)
-                                .allowsHitTesting(!quickLogIsExpanded)
-                                .onTapGesture {
-                                    popped = false
-                                    if !valuesTabActive {
-                                        withAnimation {
-                                            isExpanded.toggle()
-                                            backgroundMode = isExpanded ? .expanded : .none
+                                
+                                Image(systemName: valuesTabActive ? "info.circle.text.page" : "plus")
+                                    .contentTransition(.symbolEffect(.replace))
+                                    .font(.system(size: 36))
+                                    .frame(width: 70, height: 70)
+                                    .contentShape(Rectangle())
+                                    .glassEffect(.clear.interactive().tint(.blue))
+                                
+                                    .clipShape(Circle())
+                                    .opacity(!quickLogIsExpanded ? 1 : 0)
+                                    .allowsHitTesting(!quickLogIsExpanded)
+                                    .onTapGesture {
+                                        popped = false
+                                        if !valuesTabActive {
+                                            withAnimation {
+                                                isExpanded.toggle()
+                                                backgroundMode = isExpanded ? .expanded : .none
+                                            }
+                                        } else {
+                                            infoSelectedType = cardSelected
+                                            backgroundMode = .expanded
                                         }
-                                    } else {
-                                        infoSelectedType = cardSelected
-                                        backgroundMode = .expanded
                                     }
-                                }
+                            }
+                            .position(x: geo.size.width * 0.5, y: geo.size.height * 0.94)
                         }
                     }
                     
@@ -389,17 +402,20 @@ struct ContentView: View {
             .overlay(
                 Group {
                     if showStreakAnimation {
-                        StreakAnimation()
-                            .onAppear {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-                                    withAnimation { showStreakAnimation = false }
-                                }
+                        StreakAnimation(
+                            oldStreak: max(user.streak - 1, 0),
+                            newStreak: user.streak
+                        )
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                                withAnimation { showStreakAnimation = false }
                             }
+                        }
                     }
                 }
             )
-
         }
+        .environmentObject(user)
         .simultaneousGesture(
             DragGesture(minimumDistance: 50)
                 .onEnded { value in
