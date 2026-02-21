@@ -8,6 +8,7 @@
 import SwiftUI
 import PhotosUI
 internal import CoreData
+import Combine
 
 extension Color {
     static func background(for colorScheme: ColorScheme) -> [Color] {
@@ -37,11 +38,13 @@ struct ContentView: View {
     @State var cardSelected: TypeOfContribution? = nil
     @State var levelCardSelected: UUID = levelMilestones.first!.id
     @State var totalContributionCardSelected: UUID = totalContributionMilestones.first!.id
+    @State private var showAllContributions: Bool = false
     
     // Animation and Onboarding
     @State private var showStreakAnimation: Bool = false
     @State private var showOnboarding: Bool = false
     @State private var popped = false
+    
 
     // Selected Types
     @State private var selectedType: TypeOfContribution? = nil
@@ -50,6 +53,7 @@ struct ContentView: View {
     // Values tab
     @State private var selectedTab: Tab = .home
     @State private var valuesTabActive: Bool = false
+    
     
     // Time management
     var challengeManager: ChallengeManager {
@@ -61,24 +65,29 @@ struct ContentView: View {
             TabView (selection: $selectedTab) {
                 HomeView(backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
                     .tabItem { Label("Home", systemImage: "house.fill") }
-                    .tag(Tab.home)
+                
+                    .tag(withAnimation {Tab.home} )
                 ChallengesView(selectedLevelCard: $levelCardSelected, selectedTotalContributionCard: $totalContributionCardSelected)
                     .tabItem { Label("Challenges", systemImage: "crown") }
-                    .tag(Tab.challenges)
+                    .tag(withAnimation{Tab.challenges})
                 ValuesView(cardSelected: $cardSelected, infoSelectedType: $infoSelectedType, backgroundMode: $backgroundMode, infoNamespace: infoNamespace)
                     .tabItem { Label("Values", systemImage: "star") }
-                    .tag(Tab.values)
+                    .tag(withAnimation{Tab.values})
                 AccountView()
                     .tabItem { Label("Account", systemImage: "person.crop.circle.fill")}
-                    .tag(Tab.account)
+                    .tag(withAnimation{Tab.account})
             }
             
             .onChange(of: selectedTab) { oldValue, newValue in
                 if newValue == .values {
-                    valuesTabActive = true
+                    withAnimation {
+                        valuesTabActive = true
+                    }
                 }
                 if oldValue == .values {
-                    valuesTabActive = false
+                    withAnimation {
+                        valuesTabActive = false
+                    }
                 }
             }
             
@@ -125,7 +134,7 @@ struct ContentView: View {
                     // Hold Add button and ContributionBubbles
                     ZStack {
                         // ContributionBubbles
-                        if !quickLogIsExpanded && !valuesTabActive {
+                        if !quickLogIsExpanded && !valuesTabActive && selectedTab != .account {
                             ContributionBubble(
                                 iconName: "bubbles.and.sparkles",
                                 id: "Cleanliness",
@@ -300,43 +309,61 @@ struct ContentView: View {
                                            buttons: buttons)
                         }
                         
-                        if !quickLogIsExpanded {
+                        if !quickLogIsExpanded && selectedTab != .account {
                             ZStack {
-                                RadialGradient(
-                                    gradient: Gradient(colors: [
-                                        .blue.opacity(0.2), .clear
-                                    ]),
-                                    center: .center,
-                                    startRadius: 0,
-                                    endRadius: 60
-                                )
-                                .frame(width: 120, height: 120)
-                                .clipShape(Circle())
-                                
-                                Image(systemName: valuesTabActive ? "info.circle.text.page" : "plus")
-                                    .contentTransition(.symbolEffect(.replace))
-                                    .font(.system(size: 36))
-                                    .frame(width: 70, height: 70)
-                                    .contentShape(Rectangle())
-                                    .glassEffect(.clear.interactive().tint(.blue))
-                                
+                                Group {
+                                    RadialGradient(
+                                        gradient: Gradient(colors: [
+                                            .blue.opacity(0.2), .clear
+                                        ]),
+                                        center: .center,
+                                        startRadius: 0,
+                                        endRadius: 60
+                                    )
+                                    .frame(width: 120, height: 120)
                                     .clipShape(Circle())
-                                    .opacity(!quickLogIsExpanded ? 1 : 0)
-                                    .allowsHitTesting(!quickLogIsExpanded)
-                                    .onTapGesture {
-                                        popped = false
-                                        if !valuesTabActive {
-                                            withAnimation {
-                                                isExpanded.toggle()
-                                                backgroundMode = isExpanded ? .expanded : .none
+                                    
+                                    Image(systemName: valuesTabActive ? "info.circle.text.page" : "plus")
+                                        .contentTransition(.symbolEffect(.replace))
+                                        .font(.system(size: 36))
+                                        .frame(width: 70, height: 70)
+                                        .contentShape(Rectangle())
+                                        .glassEffect(.clear.interactive().tint(.blue))
+                                    
+                                        .clipShape(Circle())
+                                        .opacity(!quickLogIsExpanded ? 1 : 0)
+                                        .allowsHitTesting(!quickLogIsExpanded)
+                                        .onTapGesture {
+                                            popped = false
+                                            if !valuesTabActive {
+                                                withAnimation {
+                                                    isExpanded.toggle()
+                                                    backgroundMode = isExpanded ? .expanded : .none
+                                                }
+                                            } else {
+                                                infoSelectedType = cardSelected
+                                                backgroundMode = .expanded
                                             }
-                                        } else {
-                                            infoSelectedType = cardSelected
-                                            backgroundMode = .expanded
                                         }
-                                    }
+                                }
+                                .position(x: geo.size.width * 0.5, y: geo.size.height * 0.94)
+                                
+                                if !isExpanded {
+                                    Image(systemName: "list.bullet.clipboard")
+                                        .font(.system(size: 22))
+                                        .padding(.bottom, 2) // didnt look aligned for some reason
+                                        .frame(width: 50, height: 50)
+                                        .glassEffect(.clear.interactive().tint(.mint))
+                                        .contentShape(Rectangle())
+                                        .clipShape(Circle())
+                                        .position(x: geo.size.width * 0.73, y: geo.size.height * 0.94)
+                                        .matchedTransitionSource(id: "AllContributionsButton", in: buttons)
+                                        .onTapGesture {
+                                            showAllContributions = true
+                                        }
+                                        
+                                }
                             }
-                            .position(x: geo.size.width * 0.5, y: geo.size.height * 0.94)
                         }
                     }
                     
@@ -347,13 +374,14 @@ struct ContentView: View {
                                 .blur(radius: quickLogIsExpanded ? 10 : 0)
                                 .frame(width: 100, height: 100)
                                 .offset(x: quickLogIsExpanded || isExpanded ? 10 : 0)
+                                .contentShape(Rectangle().inset(by: -40)) // makes hitbox bigger by 50 points on all sides
                                 .animation(.spring(response: 0.3, dampingFraction: 0.5), value: popped)
                                 .onTapGesture {
                                     withAnimation {
                                         popped = true
                                         backgroundMode = .expanded
                                     }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                                         withAnimation {
                                             popped = false
                                             
@@ -366,7 +394,7 @@ struct ContentView: View {
                             Text("Swipe left!")
                                 .font(.system(size: 25, weight: .bold))
                                 .opacity(popped ? 1 : 0)
-                                .offset(x: popped ? -120 : -70)
+                                .offset(x: popped ? -130 : -100)
                                 .blur(radius: popped ? 0 : 10)
                                 .animation(.spring(response: 0.3, dampingFraction: 0.5), value: popped)
                         }
@@ -379,24 +407,35 @@ struct ContentView: View {
             .ignoresSafeArea(.keyboard)
             
             
+            // All Contributions Sheet
+            .sheet(isPresented: $showAllContributions, onDismiss: { backgroundMode = .none}
+            ){
+                AllContributionsSheet(user: user, contributions: contributions, backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
+                    .navigationTransition(.zoom(sourceID: "AllContributionsButton", in: buttons))
+            }
+
+            // Onboarding Sheet
             .sheet(isPresented: $showOnboarding, onDismiss: {
                 user.hasOpenedBefore = true
             }) {
                 OnboardingSheet()
             }
 
+            // Info Sheet
             .sheet(item: $infoSelectedType, onDismiss: { backgroundMode = .none }) { type in
                 InfoSheet(type: type)
                     .navigationTransition(.zoom(sourceID: type.rawValue, in: infoNamespace))
             }
+            
+            // New Contribution Sheet
             .sheet(item: $selectedType, onDismiss: { backgroundMode = .none } ) { type in
                 NewContributionSheet(type: type, user: user, backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
                     .navigationTransition(.zoom(sourceID: selectedBubbleID, in: buttons))
-                .onDisappear {
-                    if !user.playedStreakAnimation && user.isStreakCompletedToday {
-                        showStreakAnimation = true
-                        user.playedStreakAnimation = true
-                    }
+            }
+            .onChange(of: contributions.count) {
+                if !user.playedStreakAnimation && user.isStreakCompletedToday {
+                    showStreakAnimation = true
+                    user.playedStreakAnimation = true
                 }
             }
             .overlay(

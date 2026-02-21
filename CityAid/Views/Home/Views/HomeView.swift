@@ -5,62 +5,49 @@ internal import CoreData
 // MARK: - HomeView
 struct HomeView: View{
     @EnvironmentObject var user: UserData
+    @Environment(\.managedObjectContext) private var context
+    var contributionManager: ContributionManager {
+        ContributionManager(user: user, context: context)
+    }
+
     @Binding var backgroundMode : BackgroundMode
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.managedObjectContext) private var context
     @Binding var showStreakAnimation: Bool
-    
+
     @Namespace public var starNamespace
     @State private var stars: [NSManagedObjectID: Star] = [:]
     let starColours: [Color] = [.yellow, .white]
     @State private var selectedContribution: ContributionEntity?
     @State private var selectedStar: Star?
     
+
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
     ) private var contributions: FetchedResults<ContributionEntity>
     
     var body: some View {
         ZStack {
-            GeometryReader { proxy in
-                ScrollView (showsIndicators: false) {
-                    ZStack(alignment: .topLeading) {
-                        Image("BgImage")
-                            .resizable()
-                            .ignoresSafeArea()
-                            .scaledToFill()
-                            .allowsHitTesting(false)
-                        
-                        ForEach(contributions, id: \.objectID) { contribution in
-                            if let star = stars[contribution.objectID] {
-                                StarView(star: star, namespaceID: starNamespace, onTap: {
-                                    selectedStar = star
-                                    selectedContribution = contribution
-                                })
-                                .matchedTransitionSource(id: star.id, in: starNamespace)
-                                .zIndex(1)
-                            }
-                        }
-                    }
-                    
-                    VStack(spacing: 10) {
-                        ForEach(contributions) { item in
-                            ContributionRow(user: user, item: item, backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
-                                .transition(.opacity.combined(with: .scale))
-                        }
-                    }
-                    .padding(16)
-                }
-                .animation(.spring(), value: contributions.map { $0.objectID })
+            Image("BgImage")
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
                 .ignoresSafeArea()
-                .ignoresSafeArea(.keyboard)
-                .onAppear {
-                    generatePositions(in: proxy.size)
+            
+            ForEach(Array(stars.values), id: \.id) { star in
+                StarView(
+                    star: star,
+                    namespaceID: starNamespace
+                ) {
+                    // optional tap handling
+                    selectedStar = star
+                    
+                    if let contribution = contributions.first(where: { stars[$0.objectID]?.id == star.id }) {
+                        selectedContribution = contribution
+                    }
                 }
-                .onChange(of: contributions.count) { _, _ in
-                    generatePositions(in: proxy.size)
-                }
-                
+            }
+            
+            GeometryReader { proxy in                
                 VStack(alignment: .leading, spacing: 8) {
                     Text("CityAid")
                         .font(.system(size: 44, weight: .bold))
@@ -72,10 +59,17 @@ struct HomeView: View{
                 }
                 .padding()
                 .allowsHitTesting(false)
-                
+                .animation(.spring(), value: contributions.map { $0.objectID })
+                .onAppear {
+                    generatePositions(in: proxy.size)
+                }
+                .onChange(of: contributions.count) { _, _ in
+                    generatePositions(in: proxy.size)
+                }
+
             }
-            .backgroundStyle(.black)
         }
+        
         .sheet(item: $selectedContribution) { contribution in
             StarTappedView(contribution: contribution)
                 .navigationTransition(.zoom(sourceID: /*"selectedStar.id" -- never seemed to work*/"None", in: starNamespace))

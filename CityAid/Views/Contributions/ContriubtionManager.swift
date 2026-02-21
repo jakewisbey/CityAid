@@ -164,7 +164,7 @@ class ContributionManager {
         } catch let error as NSError {
             print("Core Data save error:", error)
             print("userInfo:", error.userInfo)
-            context.rollback() // important to discard the bad insert/update
+            context.rollback()
         }
     }
     
@@ -201,6 +201,65 @@ class ContributionManager {
         } catch {
             print("Error saving image: \(error)")
             return nil
+        }
+    }
+    
+    func duplicateContribution(contribution: ContributionEntity, duplicateDate: Bool, user: UserData) {
+        let duplicateContribution = ContributionEntity(context: context)
+        
+        duplicateContribution.id = UUID()
+        duplicateContribution.title = contribution.title
+        duplicateContribution.type = contribution.type
+        
+        if duplicateDate {
+            duplicateContribution.date = contribution.date
+        } else {
+            duplicateContribution.date = Date()
+        }
+        
+        duplicateContribution.xp = contribution.xp
+        user.xp += Int(duplicateContribution.xp)
+        
+        do {
+            try context.save()
+        } catch let error as NSError {
+            print("Core Data save error:", error)
+            print("userInfo:", error.userInfo)
+            context.rollback()
+        }
+    }
+        
+    func deleteContribution (contribution: ContributionEntity) {
+        // remove 2/3 of previously awarded xp from user.xp, and recalculate level in case it goes negative
+        user.xp -= ( 2 * Int(contribution.xp) / 3 )
+        user.CalculateUserLevel()
+        context.delete(contribution)
+        do {
+            try context.save()
+        } catch let error as NSError {
+            print("Core Data save error:", error)
+            print("userInfo:", error.userInfo)
+            context.rollback()
+        }
+    }
+    
+    func getMediaItems(from contribution: ContributionEntity) -> [MediaItem] {
+        guard let mediaData = contribution.media else { return [] }
+        
+        do {
+            let paths = try JSONDecoder().decode([String].self, from: mediaData)
+            return paths.compactMap { path in
+                let url = URL(fileURLWithPath: path)
+                if path.hasSuffix(".jpg"), let image = UIImage(contentsOfFile: path) {
+                    return .photo(image)
+                } else if path.hasSuffix(".mp4") {
+                    return .video(url)
+                }
+                return nil
+            }
+        } catch {
+            print("Error decoding media from contribution:", error)
+            return []
         }
     }
 }

@@ -3,6 +3,7 @@ internal import CoreData
 
 struct ContributionRow: View, Identifiable {
     let id = UUID()
+    let contributionManager: ContributionManager
     let user: UserData
     var item: ContributionEntity
     @Binding public var backgroundMode: BackgroundMode
@@ -12,104 +13,61 @@ struct ContributionRow: View, Identifiable {
     @Namespace var animationNamespace
     
     var body: some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text(item.title ?? "Untitled")
-                Text(item.type ?? "")
-                    .font(Font.caption.bold())
-                    .foregroundStyle(Color(.secondaryLabel))
-                if let date = item.date {
-                    Text(date, style: .date)
-                        .font(.system(size: 10).italic())
+        ZStack {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(item.title ?? "Untitled")
+                    Text(item.type ?? "")
+                        .font(Font.caption.bold())
                         .foregroundStyle(Color(.secondaryLabel))
+                    if let date = item.date {
+                        Text(date, style: .date)
+                            .font(.system(size: 10).italic())
+                            .foregroundStyle(Color(.secondaryLabel))
+                    }
                 }
+                .matchedTransitionSource(id: id, in: animationNamespace)
+                Spacer()
             }
-            .matchedTransitionSource(id: id, in: animationNamespace)
-            Spacer()
-            
-            Menu {
-                Button () {
+            .sheet(item: $contributionToEdit, onDismiss: {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    backgroundMode = .none
+                }
+            }) { contribution in
+                EditContributionSheet(contribution: contribution, user: user, backgroundMode: $backgroundMode)
+                    .navigationTransition(.zoom(sourceID: id, in: animationNamespace))
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button(role: .destructive) {
+                    contributionManager.deleteContribution(contribution: item)
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+                .tint(.red)
+
+                Button {
                     contributionToEdit = item
                 } label: {
                     Label("Edit", systemImage: "pencil")
                 }
-
-                Menu() {
-                    
-                    Button {
-                        // Use today's date
-                        DuplicateContribution(contribution: item, duplicateDate: false, user: user)
-                    } label: {
-                        Label("Use today's date", systemImage: "calendar")
-                    }
-                    
-                    Button {
-                        // Keep the original contribution date
-                        DuplicateContribution(contribution: item, duplicateDate: true, user: user)
-                    } label: {
-                        Label("Keep original date", systemImage: "calendar.badge.clock")
-                    }
+                .tint(.blue)
+            }
+            .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                Button {
+                    contributionManager.duplicateContribution(contribution: item, duplicateDate: false, user: user)
                 } label: {
-                    Label("Duplicate", systemImage: "document.on.document")
+                    Label("Copy (Today)", systemImage: "plus.square.on.square")
                 }
+                .tint(.green)
                 
-                Button(role: .destructive) {
-                    DeleteContribution(contribution: item)
+                Button {
+                    contributionManager.duplicateContribution(contribution: item, duplicateDate: true, user: user)
                 } label: {
-                    Label("Delete", systemImage: "trash")
+                    Label("Copy (Original)", systemImage: "document.on.document")
                 }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .frame(width: 40, height: 40)
+                .tint(.gray)
+
             }
-        }
-        
-        .sheet(item: $contributionToEdit, onDismiss: {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                backgroundMode = .none
-            }
-        }) { contribution in
-            EditContributionSheet(contribution: contribution, user: user, backgroundMode: $backgroundMode)
-                .navigationTransition(.zoom(sourceID: id, in: animationNamespace))
-        }
-    }
-    
-    func DuplicateContribution(contribution: ContributionEntity, duplicateDate: Bool, user: UserData) {
-        let duplicateContribution = ContributionEntity(context: context)
-        
-        duplicateContribution.id = UUID()
-        duplicateContribution.title = contribution.title
-        duplicateContribution.type = contribution.type
-        
-        if duplicateDate {
-            duplicateContribution.date = contribution.date
-        } else {
-            duplicateContribution.date = Date()
-        }
-        
-        duplicateContribution.xp = contribution.xp
-        user.xp += Int(duplicateContribution.xp)
-        
-        do {
-            try context.save()
-        } catch let error as NSError {
-            print("Core Data save error:", error)
-            print("userInfo:", error.userInfo)
-            context.rollback()
-        }
-    }
-        
-    func DeleteContribution (contribution: ContributionEntity) {
-        // remove 2/3 of previously awarded xp from user.xp, and recalculate level in case it goes negative
-        user.xp -= ( 2 * Int(contribution.xp) / 3 )
-        user.CalculateUserLevel()
-        context.delete(contribution)
-        do {
-            try context.save()
-        } catch let error as NSError {
-            print("Core Data save error:", error)
-            print("userInfo:", error.userInfo)
-            context.rollback()
         }
     }
 }
