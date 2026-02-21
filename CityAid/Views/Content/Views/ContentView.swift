@@ -374,7 +374,7 @@ struct ContentView: View {
                                 .blur(radius: quickLogIsExpanded ? 10 : 0)
                                 .frame(width: 100, height: 100)
                                 .offset(x: quickLogIsExpanded || isExpanded ? 10 : 0)
-                                .contentShape(Rectangle().inset(by: -40)) // makes hitbox bigger by 50 points on all sides
+                                .contentShape(Rectangle().inset(by: -40))
                                 .animation(.spring(response: 0.3, dampingFraction: 0.5), value: popped)
                                 .onTapGesture {
                                     withAnimation {

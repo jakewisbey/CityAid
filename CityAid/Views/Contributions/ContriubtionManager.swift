@@ -113,14 +113,6 @@ class ContributionManager {
             user.streak += 1
         }
         
-        /*
-        if user.isStreakCompletedToday && !user.playedStreakAnimation {
-            DispatchQueue.main.async {
-                showStreakAnimation.wrappedValue = true
-            }
-        }
-         */
-        
         do {
             try context.save()
         } catch let error as NSError {
