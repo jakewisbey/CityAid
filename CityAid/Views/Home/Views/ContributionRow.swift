@@ -51,22 +51,27 @@ struct ContributionRow: View, Identifiable {
                     Label("Edit", systemImage: "pencil")
                 }
                 .tint(.blue)
-            }
-            .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                Button {
-                    contributionManager.duplicateContribution(contribution: item, duplicateDate: false, user: user)
+                
+                Menu {
+                    ControlGroup {
+                        Button {
+                            contributionManager.duplicateContribution(contribution: item, duplicateDate: false, user: user)
+                        } label: {
+                            Label("Today's date", systemImage: "calendar")
+                        }
+                        .tint(.white)
+                        
+                        Button {
+                            contributionManager.duplicateContribution(contribution: item, duplicateDate: true, user: user)
+                        } label: {
+                            Label("Keep original", systemImage: "calendar.badge.clock")
+                        }
+                        .tint(.white)
+                    }
                 } label: {
-                    Label("Copy (Today)", systemImage: "plus.square.on.square")
+                    Label("Duplicate", systemImage: "document.on.document")
                 }
                 .tint(.green)
-                
-                Button {
-                    contributionManager.duplicateContribution(contribution: item, duplicateDate: true, user: user)
-                } label: {
-                    Label("Copy (Original)", systemImage: "document.on.document")
-                }
-                .tint(.gray)
-
             }
         }
     }

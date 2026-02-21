@@ -10,12 +10,6 @@ import PhotosUI
 internal import CoreData
 import Combine
 
-extension Color {
-    static func background(for colorScheme: ColorScheme) -> [Color] {
-        colorScheme == .dark ? [Color("BgColor"), Color.black] : [Color("BgColor"), Color.white]
-    }
-}
-
 struct ContentView: View {
     // User and Contributions
     @StateObject private var user = UserData()
@@ -347,22 +341,24 @@ struct ContentView: View {
                                         }
                                 }
                                 .position(x: geo.size.width * 0.5, y: geo.size.height * 0.94)
+
                                 
                                 if !isExpanded {
                                     Image(systemName: "list.bullet.clipboard")
                                         .font(.system(size: 22))
                                         .padding(.bottom, 2) // didnt look aligned for some reason
                                         .frame(width: 50, height: 50)
-                                        .glassEffect(.clear.interactive().tint(.mint))
+                                        .matchedTransitionSource(id: "AllContributionsButton", in: buttons)
+                                        .glassEffect(.clear.interactive())
                                         .contentShape(Rectangle())
                                         .clipShape(Circle())
                                         .position(x: geo.size.width * 0.73, y: geo.size.height * 0.94)
-                                        .matchedTransitionSource(id: "AllContributionsButton", in: buttons)
                                         .onTapGesture {
                                             showAllContributions = true
                                         }
-                                        
+
                                 }
+                                
                             }
                         }
                     }
@@ -390,6 +386,7 @@ struct ContentView: View {
                                     }
                                 }
                                 .allowsHitTesting(!popped && !quickLogIsExpanded)
+                            
                             
                             Text("Swipe left!")
                                 .font(.system(size: 25, weight: .bold))
@@ -502,7 +499,50 @@ enum BackgroundMode {
     case quickLog
 }
 
-#Preview {
-    ContentView()
+
+
+struct PreviewPersistenceController {
+    static let shared: NSPersistentContainer = {
+        // Use the same model name used elsewhere in previews
+        let container = NSPersistentContainer(name: "CityAidModel")
+
+        let description = NSPersistentStoreDescription()
+        description.type = NSInMemoryStoreType // important for previews
+        container.persistentStoreDescriptions = [description]
+
+        container.loadPersistentStores { _, error in
+            if let error = error {
+                fatalError("preview store failed: \(error)")
+            }
+        }
+
+        let context = container.viewContext
+
+        // Seed example contributions
+        let sampleTypes = ["Cleanliness", "Kindness", "Donation", "Animal Care", "Plant Care", "Other"]
+        for i in 0..<8 {
+            let contribution = ContributionEntity(context: context)
+            contribution.id = UUID()
+            contribution.date = Date().addingTimeInterval(Double(-i) * 86400)
+            contribution.title = "Preview Contribution \(i + 1)"
+            contribution.type = sampleTypes[i % sampleTypes.count]
+            contribution.notes = "This is a preview note for contribution \(i + 1)."
+        }
+
+        do {
+            try context.save()
+        } catch {
+            fatalError("preview save failed: \(error)")
+        }
+
+        return container
+    }()
 }
 
+#Preview {
+    ContentView()
+        .environment(
+            \.managedObjectContext,
+            PreviewPersistenceController.shared.viewContext
+        )
+}
