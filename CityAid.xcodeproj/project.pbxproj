@@ -43,9 +43,22 @@
 		D9792D992ECD477F001FB4FD /* CityAidUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CityAidUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D9DBD3F92F4A188F0072E738 /* Exceptions for "CityAid" folder in "CityAid" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Untitled.swift,
+			);
+			target = D9792D812ECD477E001FB4FD /* CityAid */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		D9792D842ECD477E001FB4FD /* CityAid */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D9DBD3F92F4A188F0072E738 /* Exceptions for "CityAid" folder in "CityAid" target */,
+			);
 			path = CityAid;
 			sourceTree = "<group>";
 		};

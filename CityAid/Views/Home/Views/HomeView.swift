@@ -47,7 +47,7 @@ struct HomeView: View{
                 }
             }
             
-            GeometryReader { proxy in                
+            GeometryReader { geo in
                 VStack(alignment: .leading, spacing: 8) {
                     Text("CityAid")
                         .font(.system(size: 44, weight: .bold))
@@ -61,14 +61,15 @@ struct HomeView: View{
                 .allowsHitTesting(false)
                 .animation(.spring(), value: contributions.map { $0.objectID })
                 .onAppear {
-                    generatePositions(in: proxy.size)
+                    generatePositions(in: geo.size)
                 }
                 .onChange(of: contributions.count) { _, _ in
-                    generatePositions(in: proxy.size)
+                    generatePositions(in: geo.size)
                 }
-
             }
         }
+        
+        
         
         .sheet(item: $selectedContribution) { contribution in
             StarTappedView(contribution: contribution)
@@ -86,7 +87,7 @@ struct HomeView: View{
     func randomPosition(in size: CGSize) -> CGPoint {
         CGPoint(
             x: size.width * CGFloat.random(in: 0.05...0.95),
-            y: size.height * CGFloat.random(in: 0.25...0.75)
+            y: size.height * CGFloat.random(in: 0.16...0.6)
         )
     }
     

@@ -451,6 +451,7 @@ struct ContentView: View {
                 }
             )
         }
+        .preferredColorScheme(.dark)
         .environmentObject(user)
         .simultaneousGesture(
             DragGesture(minimumDistance: 50)

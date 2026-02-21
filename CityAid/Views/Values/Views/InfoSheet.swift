@@ -2,6 +2,7 @@ import SwiftUI
 
 struct InfoSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) var colorScheme
     let type: TypeOfContribution
     
     var config: TypeConfig {
@@ -120,7 +121,8 @@ struct InfoSheet: View {
             .padding(16)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .background(Color(.black))
+        .background(.black)
+        .preferredColorScheme(.dark)
     }
 }
 

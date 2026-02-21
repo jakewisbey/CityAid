@@ -19,7 +19,6 @@ struct AllContributionsSheet: View {
             List {
                 Section {
                     ForEach(contributions) { item in
-                        
                         ContributionRow(
                             contributionManager: contributionManager,
                             user: user,
@@ -28,7 +27,8 @@ struct AllContributionsSheet: View {
                             showStreakAnimation: $showStreakAnimation
                         )
                         .matchedTransitionSource(id: item.id, in: editNamespace)
-
+                        .contentShape(Rectangle())
+                        
                         .contextMenu {
                             Button() {
                                 contributionToEdit = item
