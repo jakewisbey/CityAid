@@ -25,7 +25,7 @@ class HapticsManager {
         
     public func test() {
         DispatchQueue.main.async {
-            AudioServicesPlaySystemSound(1125)
+            AudioServicesPlaySystemSound(1108)
             HapticsManager.shared.vibrate(type: .success)
         }
     }

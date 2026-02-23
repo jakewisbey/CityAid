@@ -37,14 +37,14 @@ struct InfoSheet: View {
                          caption: "Donate to help those in need, or as a token of appreciation.",
                          cityEffects: ["£15.4 billion was raised for charity in the UK in 2024", "Nearly 3 million emergency food parcels were donated to the food bank in 2024/25", "Only 4% of Brits gave money to the homeless in 2023"],
                          mainInfo: "Donating to charity or supporting local businesses can make a significant difference in someone's life. Whether it's a one-time gift or a regular contribution, every little bit helps.",
-                         contributionOptions: ["Buy items for a person in need or donate money directly", "Support a local charity", "Donate to the food bank after your shopping"]
+                         contributionOptions: ["Buy items for a person in need or donate money directly", "Support a local charity", "Donate to your food bank"]
             )
         case .animalcare:
             return .init(imageAddress: "AnimalcareBg",
                          title: "Animal Care",
                          caption: "Take care of animals in your city to help them thrive.",
                          cityEffects: ["An estimated 70 million cats are stray in the United States", "Only 1 out of every 10 dogs born will find a permanent home", "Approximately 2.7 million dogs and cats are killed every year because shelters are too full"],
-                         mainInfo: "The biggest change you can make to help animals in need is fostering or adopting one from a shelter. Even small things, like safely sharing food or helping meet basic needs, can make a real difference in their wellbeing.",
+                         mainInfo: "The biggest change you can make to help animals in need is fostering or adopting one from a shelter. However,even small things, like safely sharing food or helping meet basic needs, can make a real difference in their wellbeing.",
                          contributionOptions: ["Help an animal in need", "Adopt animals from shelters", "Feed stray animals"]
             )
         default:
@@ -74,7 +74,7 @@ struct InfoSheet: View {
             }
             
             VStack(alignment: .leading, spacing: 8) {
-                Spacer().frame(height: 100)
+                Spacer().frame(height: 90)
                 
                 Text("\(config.title)")
                     .font(.system(size: 42, weight: .bold))

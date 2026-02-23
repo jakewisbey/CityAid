@@ -91,7 +91,12 @@ struct ContentView: View {
                 .ignoresSafeArea()
                 .allowsHitTesting(backgroundMode == .expanded)
                 .onTapGesture {
-                    withAnimation(.spring()) { backgroundMode = .none; isExpanded = false; quickLogIsExpanded = false }
+                    withAnimation(.spring()) {
+                        backgroundMode = .none
+                        isExpanded = false
+                        quickLogIsExpanded = false
+                        popped = false
+                    }
                 }
                 .animation(.easeOut(duration: 0.25), value: backgroundMode)
             
@@ -131,10 +136,25 @@ struct ContentView: View {
                         
                         if !isExpanded && !valuesTabActive && !popped {
                             QuickLogBubble(
+                                           title: "Cleared plant area",
+                                           type: .cleanliness,
+                                           originXCoord: geo.size.width * 1.2,
+                                           originYCoord: geo.size.height * 0.35,
+                                           xCoord: geo.size.width * 0.65,
+                                           yCoord: geo.size.height * 0.29,
+                                           iconName: "leaf",
+                                           delay: 0.15,
+                                           user: user,
+                                           showStreakAnimation: $showStreakAnimation,
+                                           quickLogIsExpanded:$quickLogIsExpanded,
+                                           backgroundMode: $backgroundMode,
+                                           buttons: buttons)
+
+                            QuickLogBubble(
                                            title: "Litter-Picking",
                                            type: .cleanliness,
                                            originXCoord: geo.size.width * 1.2,
-                                           originYCoord: geo.size.height * 0.50,
+                                           originYCoord: geo.size.height * 0.40,
                                            xCoord: geo.size.width * 0.7,
                                            yCoord: geo.size.height * 0.36,
                                            iconName: "trash",
@@ -149,7 +169,7 @@ struct ContentView: View {
                                            title: "Gave up my seat",
                                            type: .kindness,
                                            originXCoord: geo.size.width * 1.2,
-                                           originYCoord: geo.size.height * 0.50,
+                                           originYCoord: geo.size.height * 0.45,
                                            xCoord: geo.size.width * 0.67,
                                            yCoord: geo.size.height * 0.43,
                                            iconName: "figure.seated.side.right.child.lap",
@@ -159,14 +179,14 @@ struct ContentView: View {
                                            quickLogIsExpanded: $quickLogIsExpanded,
                                            backgroundMode: $backgroundMode,
                                            buttons: buttons)
-                            
+                                                        
                             QuickLogBubble(
                                            title: "Helped with directions",
                                            type: .kindness,
                                            originXCoord: geo.size.width * 1.2,
                                            originYCoord: geo.size.height * 0.50,
                                            xCoord: geo.size.width * 0.59,
-                                           yCoord: geo.size.height * 0.5,
+                                           yCoord: geo.size.height * 0.50,
                                            iconName: "map",
                                            delay: 0.00,
                                            user: user,
@@ -179,7 +199,7 @@ struct ContentView: View {
                                            title: "Took someone's trash",
                                            type: .cleanliness,
                                            originXCoord: geo.size.width * 1.2,
-                                           originYCoord: geo.size.height * 0.50,
+                                           originYCoord: geo.size.height * 0.55,
                                            xCoord: geo.size.width * 0.60,
                                            yCoord: geo.size.height * 0.57,
                                            iconName: "bubbles.and.sparkles",
@@ -194,7 +214,7 @@ struct ContentView: View {
                                            title: "Helped an animal",
                                            type: .animalcare,
                                            originXCoord: geo.size.width * 1.2,
-                                           originYCoord: geo.size.height * 0.50,
+                                           originYCoord: geo.size.height * 0.60,
                                            xCoord: geo.size.width * 0.66,
                                            yCoord: geo.size.height * 0.64,
                                            iconName: "carrot",
@@ -209,7 +229,7 @@ struct ContentView: View {
                                            title: "Held a door open",
                                            type: .animalcare,
                                            originXCoord: geo.size.width * 1.2,
-                                           originYCoord: geo.size.height * 0.5,
+                                           originYCoord: geo.size.height * 0.65,
                                            xCoord: geo.size.width * 0.67,
                                            yCoord: geo.size.height * 0.71,
                                            iconName: "door.left.hand.open",
@@ -342,7 +362,6 @@ struct ContentView: View {
                                         .clipShape(Circle())
                                         .opacity(!quickLogIsExpanded ? 1 : 0)
                                         .allowsHitTesting(!quickLogIsExpanded)
-                                        .sensoryFeedback(.impact(weight: .medium), trigger: isExpanded)
                                         .onTapGesture {
                                             popped = false
                                             
@@ -352,6 +371,7 @@ struct ContentView: View {
                                                     backgroundMode = isExpanded ? .expanded : .none
                                                 }
                                             } else {
+                                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                                 infoSelectedType = cardSelected
                                                 backgroundMode = .expanded
                                             }
@@ -490,15 +510,21 @@ struct ContentView: View {
 
                 }
         )
-        .onChange(of: quickLogIsExpanded) {
-            AudioServicesPlaySystemSound(1156)
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        .onChange(of: quickLogIsExpanded) { _, newValue in
+            if newValue {
+                AudioServicesPlaySystemSound(1156)
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } else {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            }
         }
         .onChange(of: isExpanded) {
             AudioServicesPlaySystemSound(1156)
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         }
-        
+        .onChange(of: popped) {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        }
         .onAppear {
             showOnboarding = !user.hasOpenedBefore
             challengeManager.handleDailyReset()

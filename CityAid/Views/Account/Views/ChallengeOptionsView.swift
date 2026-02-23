@@ -31,7 +31,6 @@ struct ChallengeOptionsView: View {
                 }
             }
         }
-        .listStyle(.insetGrouped)
         .navigationTitle("Challenge Options")
         .navigationBarTitleDisplayMode(.inline)
     }

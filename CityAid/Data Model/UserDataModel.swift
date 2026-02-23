@@ -39,14 +39,14 @@ final class UserData: ObservableObject {
     }
 
     var quickLogs: [String: Int] = UserDefaults.standard.object(forKey: "quickLogKey") as? [String: Int] ?? [
-        "Litter-Picking": 0,
-        "Gave up my seat": 0,
-        "Helped with directions": 0,
-        "Took someone's trash": 0,
-        "Helped an animal": 0,
-        "Held a door open": 0
+            "Litter-Picking": 0,
+            "Gave up my seat": 0,
+            "Cleared plant area": 0,
+            "Helped with directions": 0,
+            "Took someone's trash": 0,
+            "Helped an animal": 0,
+            "Held a door open": 0
         ]
-
     
     
     @Published var weeklyChallenges: [Challenge] = []{

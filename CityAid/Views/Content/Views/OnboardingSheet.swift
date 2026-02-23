@@ -51,6 +51,7 @@ struct OnboardingSheet: View {
                                 .font(.system(size: 12).italic())
                                 .foregroundStyle(.gray)
                         }
+                        .padding(.leading, 7)
                         .frame(maxWidth: .infinity, minHeight: 80, alignment: .leading)
 
                     }

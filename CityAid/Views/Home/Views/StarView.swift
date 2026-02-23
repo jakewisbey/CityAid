@@ -22,6 +22,7 @@ struct StarView: View {
             
             Group {
                 ZStack {
+                    
                     RadialGradient(
                         gradient: Gradient(colors: [star.color.opacity(isTapped ? 0.4 : 0.3), .black.opacity(0)]),
                         center: .center,
@@ -41,10 +42,9 @@ struct StarView: View {
                     }
                     
                     Image("Star")
-                        .renderingMode(.template)
                         .resizable()
                         .frame(width: star.width, height: star.height)
-                        .foregroundStyle(star.color.opacity(Double(opacity)))
+                        .colorMultiply(star.color.opacity(Double(opacity)))
                         .blur(radius: blurRadius)
                         .rotationEffect(.degrees(rotation))
                         .scaleEffect(scale)

@@ -246,6 +246,21 @@ class ContributionManager {
         }
     }
     
+    func deleteAllContributions(contributions: FetchedResults<ContributionEntity>) {
+        // this only deletes all contributions and related stars, does not affect anything else.
+        contributions.forEach {
+            context.delete($0)
+            
+            do {
+                try context.save()
+            } catch let error as NSError {
+                print("Core Data save error:", error)
+                print("userInfo:", error.userInfo)
+                context.rollback()
+            }
+        }
+    }
+    
     func getMediaItems(from contribution: ContributionEntity) -> [MediaItem] {
         guard let mediaData = contribution.media else { return [] }
         
