@@ -1,4 +1,5 @@
 import SwiftUI
+import AudioToolbox
 
 struct WeeklyChallengeCard: View {
     let challenge: Challenge
@@ -14,6 +15,7 @@ struct WeeklyChallengeCard: View {
                 .frame(width: 70, height: 70)
                 .scaleEffect(isTapped ? 1.2 : 1)
                 .animation(.interpolatingSpring(stiffness: 150, damping: 10), value: isTapped)
+            
                 .gesture(
                     DragGesture(minimumDistance: 0)
                             .onChanged { _ in
@@ -23,6 +25,14 @@ struct WeeklyChallengeCard: View {
                                 isTapped = false
                             }
                     )
+                .onChange(of: isTapped) { _, newValue in
+                    if newValue {
+                        AudioServicesPlaySystemSound(1156)
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    } else {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }
+                }
             
             Text("\(progress.0)/\(challenge.target) • \(challenge.xp) XP")
                 .font(.system(size: 15, weight: .semibold).italic())

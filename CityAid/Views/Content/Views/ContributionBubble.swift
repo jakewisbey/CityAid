@@ -31,6 +31,7 @@ struct ContributionBubble: View {
             .glassEffectID(id, in: buttons)
 
             .onTapGesture {
+                
                 selectedType = typeOfContribution
                 selectedBubbleID = id
                 backgroundMode = .sheet

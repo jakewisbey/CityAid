@@ -54,7 +54,7 @@ class ContributionManager {
     
     
     func saveContribution(contributionTitle: String, contributionDate: Date, contributionMedia: [MediaItem], selectedType: TypeOfContribution, contributionNotes: String, showStreakAnimation: Binding<Bool>) {
-        
+
         let entity = ContributionEntity(context: context)
         entity.id = UUID()
         
@@ -93,6 +93,9 @@ class ContributionManager {
             }
         }
         
+        AudioServicesPlaySystemSound(1125)
+        HapticsManager.shared.vibrate(type: .success)
+
         // convert to data and store
         do {
             entity.media = try JSONEncoder().encode(mediaData)
@@ -148,9 +151,13 @@ class ContributionManager {
             }
         }
         
+        AudioServicesPlaySystemSound(1125)
+        HapticsManager.shared.vibrate(type: .success)
+
+        
         // convert to data and store
         contribution.media = try? JSONEncoder().encode(mediaData)
-        
+
         do {
             try context.save()
         } catch let error as NSError {
@@ -226,6 +233,10 @@ class ContributionManager {
         user.xp -= ( 2 * Int(contribution.xp) / 3 )
         user.CalculateUserLevel()
         context.delete(contribution)
+        
+        AudioServicesPlaySystemSound(1126)
+        HapticsManager.shared.vibrate(type: .warning)
+        
         do {
             try context.save()
         } catch let error as NSError {

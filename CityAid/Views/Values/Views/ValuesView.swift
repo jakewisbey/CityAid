@@ -1,4 +1,5 @@
 import SwiftUI
+import AudioToolbox
 
 // MARK: - ValuesView
 struct ValuesView: View {
@@ -134,7 +135,10 @@ struct ValuesView: View {
                 }
             }
         }
-        
+        .onChange(of: cardSelected) { _, newValue in
+            AudioServicesPlaySystemSound(1484)
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        }
 
 
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

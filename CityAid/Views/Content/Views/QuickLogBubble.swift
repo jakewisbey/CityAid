@@ -1,5 +1,6 @@
 import SwiftUI
 internal import CoreData
+import AudioToolbox
 
 struct QuickLogBubble: View {
     let title: String
@@ -34,10 +35,10 @@ struct QuickLogBubble: View {
         
         .contentShape(Rectangle())
         .allowsHitTesting(quickLogIsExpanded)
-    
         .matchedTransitionSource(id: title, in: buttons)
-
+        
         .onTapGesture {
+            
             backgroundMode = .none
             quickLogIsExpanded = false
             

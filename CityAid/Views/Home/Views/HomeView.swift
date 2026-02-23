@@ -38,7 +38,6 @@ struct HomeView: View{
                     star: star,
                     namespaceID: starNamespace
                 ) {
-                    // optional tap handling
                     selectedStar = star
                     
                     if let contribution = contributions.first(where: { stars[$0.objectID]?.id == star.id }) {
@@ -65,11 +64,11 @@ struct HomeView: View{
                 }
                 .onChange(of: contributions.count) { _, _ in
                     generatePositions(in: geo.size)
+                    let currentIDs = Set(contributions.map { $0.objectID })
+                    stars = stars.filter { currentIDs.contains($0.key) }
                 }
             }
         }
-        
-        
         
         .sheet(item: $selectedContribution) { contribution in
             StarTappedView(contribution: contribution)

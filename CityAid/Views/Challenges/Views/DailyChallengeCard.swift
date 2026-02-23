@@ -1,4 +1,5 @@
 import SwiftUI
+import AudioToolbox
 
 struct DailyChallengeCard: View {
     @State private var isTapped: Bool = false
@@ -35,6 +36,14 @@ struct DailyChallengeCard: View {
                                                 isTapped = false
                                             }
                                     )
+                                .onChange(of: isTapped) { _, newValue in
+                                    if newValue {
+                                        AudioServicesPlaySystemSound(1156)
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                    } else {
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                    }
+                                }
 
                             
                             VStack(alignment: .leading, spacing: 7) {

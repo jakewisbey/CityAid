@@ -1,6 +1,7 @@
 import SwiftUI
 internal import CoreData
 import Combine
+import AVFoundation
 
 final class UserData: ObservableObject {
     @AppStorage("Username") var username = "Anonymous Contributor"
@@ -10,7 +11,6 @@ final class UserData: ObservableObject {
     @AppStorage("Streak") var streak = 1
     @AppStorage("PlayedStreakAnimationToday") var playedStreakAnimation: Bool = false
     @AppStorage("IsStreakCompletedToday") var isStreakCompletedToday: Bool = false
-    @AppStorage("Target") var target = 4
     
     @AppStorage("HasOpenedBefore") var hasOpenedBefore: Bool = false
     
@@ -98,7 +98,6 @@ final class UserData: ObservableObject {
         }
         
         // deleting a contribution removes xp, so this is used to calculate the new xp and level
-        // goes into negative which sohoudl fix
         while xp < 0 && level > 1 {
             level -= 1
             xp += RequiredXpForLevelUp()
@@ -109,5 +108,20 @@ final class UserData: ObservableObject {
         let bracket = level / 10
         let xpNeeded = 15 + bracket * 5
         return min(xpNeeded, 75)
+    }
+    
+    
+    // put this in user because user is imported into every file, so i dont have to do this each file. but for larger stuff probably make an AudioManager of some kind
+    var audioPlayer: AVAudioPlayer?
+    
+    func playSound(named name: String) {
+        if let url = Bundle.main.url(forResource: name, withExtension: "mp3") {
+            do {
+                audioPlayer = try AVAudioPlayer(contentsOf: url)
+                audioPlayer?.play()
+            } catch {
+                print("Error playing sound \(error)")
+            }
+        }
     }
 }

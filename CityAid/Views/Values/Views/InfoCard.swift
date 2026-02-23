@@ -83,6 +83,7 @@ struct InfoCard: View {
             }
             .padding(.top, 225)
         }
+        .allowsHitTesting(isSelected)
         .frame(width: 200, height: 300)
         .scaleEffect(isSelected ? 1.0 : 0.8, anchor: .bottom)
         .saturation(isSelected ? 1.0 : 0.0)

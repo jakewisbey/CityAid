@@ -1,6 +1,7 @@
 import SwiftUI
 internal import CoreData
 import Combine
+import AudioToolbox
 
 // MARK: - ChallengesView
 struct ChallengesView: View {
@@ -295,6 +296,14 @@ struct ChallengesView: View {
                     }
                 }
             }
+        }
+        .onChange(of: selectedLevelCard) { _, newValue in
+            AudioServicesPlaySystemSound(1484)
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        }
+        .onChange(of: selectedTotalContributionCard) { _, newValue in
+            AudioServicesPlaySystemSound(1484)
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
         }
     }
     

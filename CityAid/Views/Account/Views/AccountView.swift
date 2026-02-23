@@ -38,7 +38,7 @@ struct AccountView: View {
                             .background(Color(.gray).opacity(0.02))
                             .cornerRadius(10)
                     }
-
+                    
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Bio:")
                         TextEditor(text: $user.bio)
@@ -48,19 +48,6 @@ struct AccountView: View {
                             .background(Color(.gray).opacity(0.02))
                             .cornerRadius(10)
                     }
-                }
-
-                Section(header: Text("General")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white.opacity(0.5))
-                ) {
-                    NavigationLink("Select possible challenge types"){
-                        ChallengeOptionsView()
-                    }
-                    NavigationLink("Change QuickLog count"){
-                        QuickLogCountView(quickLogs: $quickLogs)
-                    }
-
                 }
 
                 Section(header: Text("Stats")
@@ -120,6 +107,19 @@ struct AccountView: View {
                             .frame(alignment: .trailing)
                             .padding(.trailing, 10)
                     }
+                }
+                
+                Section(header: Text("Options")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.white.opacity(0.5))
+                ) {
+                    NavigationLink("Select possible challenge types"){
+                        ChallengeOptionsView()
+                    }
+                    NavigationLink("Change QuickLog count"){
+                        QuickLogCountView(quickLogs: $quickLogs)
+                    }
+
                 }
 
                 Section(header: Text("Admin")
@@ -251,10 +251,9 @@ struct QuickLogCountView: View {
                         }
                     }
                 }
-                
-                Button("Reload") {
-                    quickLogs = UserDefaults.standard.object(forKey: "quickLogKey") as? [String:Int] ?? quickLogs
-                }
+            }
+            
+            Section(footer: Text("This will not remove your previous contributions.")) {
                 Button("Reset all to 0") {
                     UserDefaults.standard.removeObject(forKey: "quickLogKey")
                     

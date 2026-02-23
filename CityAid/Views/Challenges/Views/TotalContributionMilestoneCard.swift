@@ -1,4 +1,5 @@
 import SwiftUI
+import AudioToolbox
 
 struct TotalContributionMilestoneCard: View {
     let id: UUID
@@ -23,6 +24,7 @@ struct TotalContributionMilestoneCard: View {
                     ))
                     .scaleEffect(isTapped ? 1.2 : 1)
                     .animation(.interpolatingSpring(stiffness: 150, damping: 10), value: isTapped)
+                    .allowsHitTesting(isSelected)
                     .gesture(
                         DragGesture(minimumDistance: 0)
                                 .onChanged { _ in
@@ -32,7 +34,14 @@ struct TotalContributionMilestoneCard: View {
                                     isTapped = false
                                 }
                         )
-
+                    .onChange(of: isTapped) { _, newValue in
+                        if newValue {
+                            AudioServicesPlaySystemSound(1156)
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        } else {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        }
+                    }
 
                 
                 VStack(alignment: .leading, spacing: 3) {

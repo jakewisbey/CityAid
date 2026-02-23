@@ -1,4 +1,5 @@
 import SwiftUI
+import AudioToolbox
 
 struct StarView: View {
     let star: Star
@@ -8,8 +9,8 @@ struct StarView: View {
     @State var isInitialised: Bool = false
     
     @State var isTapped: Bool = false
-    @State var glowScale: CGFloat = 1
-    @State var rotation: Double = 135
+    @State var glowScale: CGFloat = 0
+    @State var rotation: Double = Double.random(in: 110...165)
     @State var scale: CGFloat = 0.5
     @State var opacity: Float = 0
     @State var blurRadius: CGFloat = 10
@@ -18,6 +19,7 @@ struct StarView: View {
         TimelineView(.animation) { timeline in
             let time = timeline.date.timeIntervalSinceReferenceDate
             let offset = sin(time * 0.5 + Double(star.basePosition.x)) * star.floatAmplifier
+            
             Group {
                 ZStack {
                     RadialGradient(
@@ -27,6 +29,7 @@ struct StarView: View {
                         endRadius: star.width
                     )
                     .scaleEffect(glowScale)
+                    .animation(.bouncy, value: isInitialised)
                     .onAppear {
                         let delay = Double.random(in: 0...5)
                         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
@@ -55,6 +58,9 @@ struct StarView: View {
             )
             .onTapGesture {
                 onTap?()
+                AudioServicesPlaySystemSound(1156)
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+
                 
                 withAnimation(.spring(response: 0.25, dampingFraction: 0.5, blendDuration: 0)) {
                     isTapped = true
@@ -70,23 +76,25 @@ struct StarView: View {
                     }
                 }
             }
-            
-            .onAppear {
-                if !isInitialised {
-                    isInitialised = true
-                    
-                    // spin in
-                    DispatchQueue.main.asyncAfter(deadline: .now() + star.basePosition.y / 2000) {
-                        withAnimation(.interpolatingSpring(stiffness: 100, damping: 10)) {
-                            rotation = 0
-                            scale = 1
-                            opacity = star.opacity
-                            blurRadius = 0
-                        }
+        }
+
+        .onAppear {
+            if !isInitialised {
+                isInitialised = true
+                
+                // spin in
+                DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 0...0.5)) {
+                    withAnimation(.interpolatingSpring(stiffness: 100, damping: 10)) {
+                        rotation = 0
+                        scale = 1
+                        glowScale = 1
+                        opacity = star.opacity
+                        blurRadius = 0
                     }
                 }
             }
         }
+
     }
 }
 
