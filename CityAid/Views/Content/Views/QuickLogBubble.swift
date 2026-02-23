@@ -20,6 +20,7 @@ struct QuickLogBubble: View {
         ContributionManager(user: user, context: context)
     }
     
+    @State var isTapped: Bool = false
     @Binding var quickLogIsExpanded: Bool
     @Binding var backgroundMode: BackgroundMode
     let buttons: Namespace.ID
@@ -30,6 +31,7 @@ struct QuickLogBubble: View {
         .contentTransition(.symbolEffect(.replace))
         .font(.system(size: 20, weight: .bold).italic())
         .scaleEffect(quickLogIsExpanded ? 1 : 0.45)
+        .scaleEffect(quickLogIsExpanded && isTapped ? 1.1 : 1)
         .opacity(quickLogIsExpanded ? 1 : 0)
         .blur(radius: quickLogIsExpanded ? 0 : 12)
         
@@ -37,18 +39,25 @@ struct QuickLogBubble: View {
         .allowsHitTesting(quickLogIsExpanded)
         .matchedTransitionSource(id: title, in: buttons)
         
-        .onTapGesture {
-            
-            backgroundMode = .none
-            quickLogIsExpanded = false
-            
-            contributionManager.saveContribution(contributionTitle: createTitle(), contributionDate: Date(), contributionMedia: [], selectedType: type, contributionNotes: "Added via Quick Log", showStreakAnimation: $showStreakAnimation)
-            
-        }
+        
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isTapped { isTapped = true }
+                    }
+                    .onEnded { _ in
+                        isTapped = false
+                        backgroundMode = .none
+                        quickLogIsExpanded = false
+                        
+                        contributionManager.saveContribution(contributionTitle: createTitle(), contributionDate: Date(), contributionMedia: [], selectedType: type, contributionNotes: "Added via Quick Log", showStreakAnimation: $showStreakAnimation)
+                    }
+            )
         .position(x: quickLogIsExpanded ? xCoord : originXCoord,
                   y: quickLogIsExpanded ? yCoord : originYCoord)
         
         .animation(.bouncy.delay(TimeInterval(delay)), value: quickLogIsExpanded)
+        .animation(.interpolatingSpring(stiffness: 175, damping: 10), value: isTapped)
     }
     
     func createTitle() -> String {

@@ -22,7 +22,6 @@ struct StarView: View {
             
             Group {
                 ZStack {
-                    
                     RadialGradient(
                         gradient: Gradient(colors: [star.color.opacity(isTapped ? 0.4 : 0.3), .black.opacity(0)]),
                         center: .center,

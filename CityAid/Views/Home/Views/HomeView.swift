@@ -67,7 +67,32 @@ struct HomeView: View{
                     let currentIDs = Set(contributions.map { $0.objectID })
                     stars = stars.filter { currentIDs.contains($0.key) }
                 }
+                
+                TimelineView(.animation) { timeline in
+                    let time = timeline.date.timeIntervalSinceReferenceDate
+                    let offset = sin(time * 0.5) * 5
+
+                    ZStack {
+                        RadialGradient(colors: [.white.opacity(0.1), .clear], center: .center, startRadius: 0, endRadius: 150)
+                            .scaleEffect(x: 1.5, y: 0.7)
+                        
+                        VStack (spacing: 10) {
+                            Text("No contributions yet.")
+                                .font(.system(size: 24, weight: .bold))
+                            
+                            Text("Tap the + button to get started.")
+                                .font(.system(size: 12).italic())
+                                .foregroundStyle(Color(.secondaryLabel))
+                        }
+                    }
+                    .position(x: geo.size.width * 0.5, y: geo.size.width * 0.6 + offset)
+                    .opacity(contributions.count == 0 ? 1 : 0)
+                    .blur(radius: contributions.count == 0 ? 0 : 10)
+                    .animation(.easeOut, value: contributions.count)
+                }
             }
+            
+                
         }
         
         .sheet(item: $selectedContribution) { contribution in
