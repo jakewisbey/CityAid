@@ -19,6 +19,7 @@ struct AccountView: View {
     @State private var path = NavigationPath()
     @State private var showingStreakInfo = false;
     @State private var streakText = ""
+    @State private var quickLogs: [String: Int] = [:]
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -57,7 +58,7 @@ struct AccountView: View {
                         ChallengeOptionsView()
                     }
                     NavigationLink("Change QuickLog count"){
-                        QuickLogCountView()
+                        QuickLogCountView(quickLogs: $quickLogs)
                     }
 
                 }
@@ -166,6 +167,7 @@ struct AccountView: View {
                                     "Helped an animal": 0,
                                 ]
                                 UserDefaults.standard.set(defaults, forKey: "quickLogKey")
+                                quickLogs = defaults
                             }
                     }
                 }
@@ -179,6 +181,10 @@ struct AccountView: View {
             .scrollContentBackground(.hidden)
             .navigationTitle("Settings")
         }
+        .onAppear {
+            quickLogs = UserDefaults.standard.object(forKey: "quickLogKey") as? [String: Int] ?? [:]
+        }
+
     }
     
     func hideKeyboard() {
@@ -211,7 +217,7 @@ struct AccountView: View {
 }
 
 struct QuickLogCountView: View {
-    @State private var quickLogs: [String: Int] = [:]
+    @Binding var quickLogs: [String: Int]
 
     var body: some View {
         List {
@@ -222,15 +228,45 @@ struct QuickLogCountView: View {
             footer: Text("Change the number of times you have completed a specific QuickLog. This will update the title of the QuickLog when you select it.")
             ) {
                 ForEach(quickLogs.keys.sorted(), id: \.self) { key in
-                    HStack {
-                        Text(key)
-                        Spacer()
-                        Text("\(quickLogs[key] ?? 0)")
+                    DisclosureGroup {
+                        Stepper(
+                            value: Binding(
+                                get: { quickLogs[key] ?? 0 },
+                                set: { newValue in
+                                    quickLogs[key] = newValue
+                                    UserDefaults.standard.set(quickLogs, forKey: "quickLogKey")
+                                }
+                            ),
+                            in: 0...255,
+                            step: 1
+                        ) {
+                            Text("Count: \(quickLogs[key] ?? 0)")
+                        }
+                    } label: {
+                        HStack {
+                            Text(key)
+                            Spacer()
+                            Text("\(quickLogs[key] ?? 0)")
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
                 
                 Button("Reload") {
                     quickLogs = UserDefaults.standard.object(forKey: "quickLogKey") as? [String:Int] ?? quickLogs
+                }
+                Button("Reset all to 0") {
+                    UserDefaults.standard.removeObject(forKey: "quickLogKey")
+                    
+                    let defaults: [String: Int] = [
+                        "Litter-Picking": 0,
+                        "Gave up my seat": 0,
+                        "Helped with directions": 0,
+                        "Took someone's trash": 0,
+                        "Helped an animal": 0,
+                    ]
+                    UserDefaults.standard.set(defaults, forKey: "quickLogKey")
+                    quickLogs = defaults
                 }
             }
         }
@@ -245,7 +281,7 @@ struct QuickLogCountView: View {
 }
 
 #Preview {
-    QuickLogCountView()
+    QuickLogCountView(quickLogs: .constant(UserDefaults.standard.object(forKey: "quickLogKey") as? [String: Int] ?? [:]))
 }
 
 

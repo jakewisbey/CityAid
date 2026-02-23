@@ -44,6 +44,7 @@ final class UserData: ObservableObject {
         "Helped with directions": 0,
         "Took someone's trash": 0,
         "Helped an animal": 0,
+        "Held a door open": 0
         ]
 
     

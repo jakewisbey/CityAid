@@ -47,8 +47,7 @@ struct QuickLogBubble: View {
         .position(x: quickLogIsExpanded ? xCoord : originXCoord,
                   y: quickLogIsExpanded ? yCoord : originYCoord)
         
-        .animation(.spring(response: 0.6, dampingFraction: 0.72, blendDuration: 0)
-            .delay(TimeInterval(delay)), value: quickLogIsExpanded)
+        .animation(.bouncy.delay(TimeInterval(delay)), value: quickLogIsExpanded)
     }
     
     func createTitle() -> String {

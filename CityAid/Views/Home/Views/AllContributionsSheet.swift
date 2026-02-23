@@ -1,4 +1,5 @@
 import SwiftUI
+internal import CoreData
 
 struct AllContributionsSheet: View {
     let user: UserData
@@ -26,9 +27,10 @@ struct AllContributionsSheet: View {
                             backgroundMode: $backgroundMode,
                             showStreakAnimation: $showStreakAnimation
                         )
+                        .transition(.opacity.combined(with: .scale))
                         .matchedTransitionSource(id: item.id, in: editNamespace)
                         .contentShape(Rectangle())
-                        
+
                         .contextMenu {
                             Button() {
                                 contributionToEdit = item

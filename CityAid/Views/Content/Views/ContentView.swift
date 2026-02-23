@@ -59,17 +59,16 @@ struct ContentView: View {
             TabView (selection: $selectedTab) {
                 HomeView(backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
                     .tabItem { Label("Home", systemImage: "house.fill") }
-                
-                    .tag(withAnimation {Tab.home} )
+                    .tag(Tab.home)
                 ChallengesView(selectedLevelCard: $levelCardSelected, selectedTotalContributionCard: $totalContributionCardSelected)
                     .tabItem { Label("Challenges", systemImage: "crown") }
-                    .tag(withAnimation{Tab.challenges})
+                    .tag(Tab.challenges)
                 ValuesView(cardSelected: $cardSelected, infoSelectedType: $infoSelectedType, backgroundMode: $backgroundMode, infoNamespace: infoNamespace)
                     .tabItem { Label("Values", systemImage: "star") }
-                    .tag(withAnimation{Tab.values})
+                    .tag(Tab.values)
                 AccountView()
                     .tabItem { Label("Account", systemImage: "person.crop.circle.fill")}
-                    .tag(withAnimation{Tab.account})
+                    .tag(Tab.account)
             }
             
             .onChange(of: selectedTab) { oldValue, newValue in
@@ -128,104 +127,105 @@ struct ContentView: View {
                     // Hold Add button and ContributionBubbles
                     ZStack {
                         // ContributionBubbles
-                        if !quickLogIsExpanded && !valuesTabActive && selectedTab != .account {
-                            ContributionBubble(
-                                iconName: "bubbles.and.sparkles",
-                                id: "Cleanliness",
-                                originXCoord: geo.size.width * 0.5,
-                                originYCoord: geo.size.height * 0.94,
-                                xCoord: -120,
-                                yCoord: -20,
-                                delay: 0.05,
-                                typeOfContribution: .cleanliness,
-                                isExpanded: $isExpanded,
-                                selectedType: $selectedType,
-                                backgroundMode: $backgroundMode,
-                                selectedBubbleID: $selectedBubbleID,
-                                buttons: buttons
-                            )
-                            
-                            ContributionBubble(
-                                iconName: "leaf",
-                                id: "Plant Care",
-                                originXCoord: geo.size.width * 0.5,
-                                originYCoord: geo.size.height * 0.94,
-                                xCoord: -90,
-                                yCoord: -80,
-                                delay: 0.15,
-                                typeOfContribution: .plantcare,
-                                isExpanded: $isExpanded,
-                                selectedType: $selectedType,
-                                backgroundMode: $backgroundMode,
-                                selectedBubbleID: $selectedBubbleID,
-                                buttons: buttons
-                            )
-                            
-                            ContributionBubble(
-                                iconName: "heart",
-                                id: "Kindness",
-                                originXCoord: geo.size.width * 0.5,
-                                originYCoord: geo.size.height * 0.94,
-                                xCoord: -40,
-                                yCoord: -130,
-                                delay: 0.10,
-                                typeOfContribution: .kindness,
-                                isExpanded: $isExpanded,
-                                selectedType: $selectedType,
-                                backgroundMode: $backgroundMode,
-                                selectedBubbleID: $selectedBubbleID,
-                                buttons: buttons
-                            )
-                            
-                            ContributionBubble(
-                                iconName: "gift",
-                                id: "Donation",
-                                originXCoord: geo.size.width * 0.5,
-                                originYCoord: geo.size.height * 0.94,
-                                xCoord: 30,
-                                yCoord: -130,
-                                delay: 0.05,
-                                typeOfContribution: .donation,
-                                isExpanded: $isExpanded,
-                                selectedType: $selectedType,
-                                backgroundMode: $backgroundMode,
-                                selectedBubbleID: $selectedBubbleID,
-                                buttons: buttons
-                            )
-                            
-                            ContributionBubble(
-                                iconName: "dog",
-                                id: "Animal Care",
-                                originXCoord: geo.size.width * 0.5,
-                                originYCoord: geo.size.height * 0.94,
-                                xCoord: 90,
-                                yCoord: -80,
-                                delay: 0.20,
-                                typeOfContribution: .animalcare,
-                                isExpanded: $isExpanded,
-                                selectedType: $selectedType,
-                                backgroundMode: $backgroundMode,
-                                selectedBubbleID: $selectedBubbleID,
-                                buttons: buttons
-                            )
-                            
-                            ContributionBubble(
-                                iconName: "ellipsis.circle",
-                                id: "Other",
-                                originXCoord: geo.size.width * 0.5,
-                                originYCoord: geo.size.height * 0.94,
-                                xCoord: 120,
-                                yCoord: -20,
-                                delay: 0.12,
-                                typeOfContribution: .other,
-                                isExpanded: $isExpanded,
-                                selectedType: $selectedType,
-                                backgroundMode: $backgroundMode,
-                                selectedBubbleID: $selectedBubbleID,
-                                buttons: buttons
-                            )
+                        ZStack {
+                            if !quickLogIsExpanded && !valuesTabActive && selectedTab != .account {
+                                ContributionBubble(
+                                    iconName: "bubbles.and.sparkles",
+                                    id: "Cleanliness",
+                                    originXCoord: geo.size.width * 0.5,
+                                    originYCoord: geo.size.height * 0.94,
+                                    xCoord: -120,
+                                    yCoord: -20,
+                                    delay: 0.05,
+                                    typeOfContribution: .cleanliness,
+                                    isExpanded: $isExpanded,
+                                    selectedType: $selectedType,
+                                    backgroundMode: $backgroundMode,
+                                    selectedBubbleID: $selectedBubbleID,
+                                    buttons: buttons
+                                )
+                                
+                                ContributionBubble(
+                                    iconName: "leaf",
+                                    id: "Plant Care",
+                                    originXCoord: geo.size.width * 0.5,
+                                    originYCoord: geo.size.height * 0.94,
+                                    xCoord: -90,
+                                    yCoord: -80,
+                                    delay: 0.15,
+                                    typeOfContribution: .plantcare,
+                                    isExpanded: $isExpanded,
+                                    selectedType: $selectedType,
+                                    backgroundMode: $backgroundMode,
+                                    selectedBubbleID: $selectedBubbleID,
+                                    buttons: buttons
+                                )
+                                
+                                ContributionBubble(
+                                    iconName: "heart",
+                                    id: "Kindness",
+                                    originXCoord: geo.size.width * 0.5,
+                                    originYCoord: geo.size.height * 0.94,
+                                    xCoord: -40,
+                                    yCoord: -130,
+                                    delay: 0.10,
+                                    typeOfContribution: .kindness,
+                                    isExpanded: $isExpanded,
+                                    selectedType: $selectedType,
+                                    backgroundMode: $backgroundMode,
+                                    selectedBubbleID: $selectedBubbleID,
+                                    buttons: buttons
+                                )
+                                
+                                ContributionBubble(
+                                    iconName: "gift",
+                                    id: "Donation",
+                                    originXCoord: geo.size.width * 0.5,
+                                    originYCoord: geo.size.height * 0.94,
+                                    xCoord: 30,
+                                    yCoord: -130,
+                                    delay: 0.05,
+                                    typeOfContribution: .donation,
+                                    isExpanded: $isExpanded,
+                                    selectedType: $selectedType,
+                                    backgroundMode: $backgroundMode,
+                                    selectedBubbleID: $selectedBubbleID,
+                                    buttons: buttons
+                                )
+                                
+                                ContributionBubble(
+                                    iconName: "dog",
+                                    id: "Animal Care",
+                                    originXCoord: geo.size.width * 0.5,
+                                    originYCoord: geo.size.height * 0.94,
+                                    xCoord: 90,
+                                    yCoord: -80,
+                                    delay: 0.20,
+                                    typeOfContribution: .animalcare,
+                                    isExpanded: $isExpanded,
+                                    selectedType: $selectedType,
+                                    backgroundMode: $backgroundMode,
+                                    selectedBubbleID: $selectedBubbleID,
+                                    buttons: buttons
+                                )
+                                
+                                ContributionBubble(
+                                    iconName: "ellipsis.circle",
+                                    id: "Other",
+                                    originXCoord: geo.size.width * 0.5,
+                                    originYCoord: geo.size.height * 0.94,
+                                    xCoord: 120,
+                                    yCoord: -20,
+                                    delay: 0.12,
+                                    typeOfContribution: .other,
+                                    isExpanded: $isExpanded,
+                                    selectedType: $selectedType,
+                                    backgroundMode: $backgroundMode,
+                                    selectedBubbleID: $selectedBubbleID,
+                                    buttons: buttons
+                                )
+                            }
                         }
-                        
                         if !isExpanded && !valuesTabActive && !popped {
                             QuickLogBubble(
                                            title: "Litter-Picking",
@@ -235,7 +235,7 @@ struct ContentView: View {
                                            xCoord: geo.size.width * 0.7,
                                            yCoord: geo.size.height * 0.36,
                                            iconName: "trash",
-                                           delay: 0.1,
+                                           delay: 0.10,
                                            user: user,
                                            showStreakAnimation: $showStreakAnimation,
                                            quickLogIsExpanded:$quickLogIsExpanded,
@@ -276,7 +276,7 @@ struct ContentView: View {
                                            title: "Took someone's trash",
                                            type: .cleanliness,
                                            originXCoord: geo.size.width * 1.2,
-                                           originYCoord: geo.size.height * 0.5,
+                                           originYCoord: geo.size.height * 0.50,
                                            xCoord: geo.size.width * 0.60,
                                            yCoord: geo.size.height * 0.57,
                                            iconName: "bubbles.and.sparkles",
@@ -291,16 +291,32 @@ struct ContentView: View {
                                            title: "Helped an animal",
                                            type: .animalcare,
                                            originXCoord: geo.size.width * 1.2,
-                                           originYCoord: geo.size.height * 0.5,
+                                           originYCoord: geo.size.height * 0.50,
                                            xCoord: geo.size.width * 0.66,
                                            yCoord: geo.size.height * 0.64,
                                            iconName: "carrot",
-                                           delay: 0.1,
+                                           delay: 0.10,
                                            user: user,
                                            showStreakAnimation: $showStreakAnimation,
                                            quickLogIsExpanded: $quickLogIsExpanded,
                                            backgroundMode: $backgroundMode,
                                            buttons: buttons)
+                            
+                            QuickLogBubble(
+                                           title: "Held a door open",
+                                           type: .animalcare,
+                                           originXCoord: geo.size.width * 1.2,
+                                           originYCoord: geo.size.height * 0.5,
+                                           xCoord: geo.size.width * 0.67,
+                                           yCoord: geo.size.height * 0.71,
+                                           iconName: "door.left.hand.open",
+                                           delay: 0.15,
+                                           user: user,
+                                           showStreakAnimation: $showStreakAnimation,
+                                           quickLogIsExpanded: $quickLogIsExpanded,
+                                           backgroundMode: $backgroundMode,
+                                           buttons: buttons)
+
                         }
                         
                         if !quickLogIsExpanded && selectedTab != .account {
@@ -451,6 +467,7 @@ struct ContentView: View {
                 }
             )
         }
+        .animation(.bouncy, value: selectedTab)
         .preferredColorScheme(.dark)
         .environmentObject(user)
         .simultaneousGesture(

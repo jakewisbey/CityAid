@@ -41,7 +41,7 @@ struct ContributionBubble: View {
             .offset(x: isExpanded ? xCoord : 0,
                     y: isExpanded ? yCoord : 0)
             
-            .animation(.interpolatingSpring(stiffness: 190, damping: 22) .delay(TimeInterval(delay)), value: isExpanded
-            )
+            .animation(.interpolatingSpring(stiffness: 190, damping: 22) .delay(TimeInterval(delay)), value: isExpanded)
+            .animation(.bouncy.delay(TimeInterval(delay)), value: isExpanded)
     }
 }
