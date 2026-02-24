@@ -551,7 +551,7 @@ enum BackgroundMode {
 }
 
 
-
+// chatgpt nice preview
 struct PreviewPersistenceController {
     static let shared: NSPersistentContainer = {
         // Use the same model name used elsewhere in previews
@@ -572,9 +572,10 @@ struct PreviewPersistenceController {
         // Seed example contributions
         let sampleTypes = ["Cleanliness", "Kindness", "Donation", "Animal Care", "Plant Care", "Other"]
         for i in 0..<8 {
+            var random: Int = Int.random(in: 0...6)
             let contribution = ContributionEntity(context: context)
             contribution.id = UUID()
-            contribution.date = Date().addingTimeInterval(Double(-i) * 86400)
+            contribution.date = Date().addingTimeInterval(Double(-i - random) * 86400)
             contribution.title = "Preview Contribution \(i + 1)"
             contribution.type = sampleTypes[i % sampleTypes.count]
             contribution.notes = "This is a preview note for contribution \(i + 1)."

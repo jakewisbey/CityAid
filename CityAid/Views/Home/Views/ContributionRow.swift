@@ -5,7 +5,7 @@ struct ContributionRow: View, Identifiable {
     let id = UUID()
     let contributionManager: ContributionManager
     let user: UserData
-    var item: ContributionEntity
+    @ObservedObject var item: ContributionEntity
     @Binding public var backgroundMode: BackgroundMode
     @Binding public var showStreakAnimation: Bool
     @State private var contributionToEdit: ContributionEntity? = nil

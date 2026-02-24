@@ -10,8 +10,9 @@ struct HomeView: View{
         ContributionManager(user: user, context: context)
     }
     
-    @State var fgCityOffset: CGFloat = 100
-    @State var fgCityOpacity: Double = 0.75
+    @State var fgCityOffset: CGFloat = -10
+    @State var fgCityOpacity: Double = 0.5
+    @State var fgCityScale: CGFloat = 0.9
     
     @State var titleTextOffset: CGFloat = -10
     @State var titleTextOpacity: Double = 0
@@ -74,8 +75,8 @@ struct HomeView: View{
                         .scaledToFit()
                         .blur(radius: 5)
                         .opacity(fgCityOpacity)
-                        .scaleEffect(x: geo.size.width / 1000 * 6, y: geo.size.height / 1000 * 2)
-                        .position(x: geo.size.width * 0.46, y: geo.size.height * 0.73 + fgCityOffset)
+                        .scaleEffect(x: geo.size.width / 1000 * 6 * fgCityScale, y: geo.size.height / 1000 * 3.5)
+                        .position(x: geo.size.width * 0.46, y: geo.size.height * 0.80 + fgCityOffset)
                         .ignoresSafeArea()
                         .animation(.interpolatingSpring(stiffness: 50, damping: 15), value: fgCityOffset)
                         
@@ -121,6 +122,7 @@ struct HomeView: View{
         .onAppear {
             fgCityOffset = 0
             fgCityOpacity = 1
+            fgCityScale = 1
             
             titleTextOffset = 0
             titleTextOpacity = 1
