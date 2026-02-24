@@ -1,6 +1,7 @@
 import SwiftUI
 internal import CoreData
 import Charts
+import Combine
 
 struct AllContributionsSheet: View {
     let user: UserData
@@ -37,8 +38,8 @@ struct AllContributionsSheet: View {
                             .padding(.bottom, 17)
                             
                             Chart {
-                                ForEach(getContributionsThisWeek().keys.sorted(), id: \.self) { date in
-                                    let count = getContributionsThisWeek()[date]?.count ?? 0
+                                ForEach(contributionToDateDictionary.keys.sorted(), id: \.self) { date in
+                                    let count = contributionToDateDictionary[date]?.count ?? 0
                                     
                                     if selectedBarStyle == .bar {
                                         BarMark(
@@ -55,12 +56,27 @@ struct AllContributionsSheet: View {
                                     }
                                 }
                             }
-                            .chartYScale(domain: 0...max(3, (getContributionsThisWeek().values.map { $0.count }.max() ?? 0) + 1))
+                            .chartYScale(domain: 0...max(3, (contributionToDateDictionary.values.map { $0.count }.max() ?? 0) + 1))
                             .frame(width: geo.size.width * 0.85, height: geo.size.height * 0.2)
                             .padding(.leading, 10)
                             
-                            .animation(.bouncy, value: contributions.count)
+                            .animation(.bouncy, value: contributionToDateDictionary)
                             .animation(.bouncy, value: selectedBarStyle)
+                            
+                            .onChange(of: contributions.count) {
+                                contributionToDateDictionary =  getContributionsThisWeek()
+                            }
+                            .onAppear() {
+                                contributionToDateDictionary =  getContributionsThisWeek()
+                            }
+                            .onReceive(
+                                NotificationCenter.default.publisher(
+                                    for: .NSCalendarDayChanged
+                                ).receive(on: RunLoop.main)
+                            ) { _ in
+                                contributionToDateDictionary =  getContributionsThisWeek()
+                            }
+
                         }
                         .listRowSeparator(.hidden)
                         
@@ -148,13 +164,9 @@ struct AllContributionsSheet: View {
             let startOfDay = calendar.startOfDay(for: date)
             
             if result[startOfDay] != nil {
-                result[startOfDay, default: []].append(contribution)
+                result[startOfDay]?.append(contribution)
             }
         }
-        
-        // convert date to stuff like Mon Tues Wed etc (does this actually work?)
-        let formatter = DateFormatter()
-        formatter.setLocalizedDateFormatFromTemplate("EEE")
         
         return result
     }
