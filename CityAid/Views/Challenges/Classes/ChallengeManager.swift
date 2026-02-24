@@ -1,18 +1,25 @@
 import SwiftUI
 internal import CoreData
 
+@MainActor
 class ChallengeManager {
+    // User
     var user: UserData
-    
-    init(user: UserData) {
+    var contributions: FetchedResults<ContributionEntity>
+    init(user: UserData, contributions: FetchedResults<ContributionEntity>) {
         self.user = user
+        self.contributions = contributions
     }
+        
     
     func rerollDailyChallenge() {
         let newChallenge = Challenge.createChallenge(.daily, nil, user.selectedChallengeContributionTypes)
-        user.dailyChallenge = newChallenge
-        if let encoded = try? JSONEncoder().encode(newChallenge) {
-            user.dailyData = encoded
+        
+        DispatchQueue.main.async {
+        self.user.dailyChallenge = newChallenge
+            if let encoded = try? JSONEncoder().encode(newChallenge) {
+                self.user.dailyData = encoded
+            }
         }
     }
     
@@ -35,9 +42,11 @@ class ChallengeManager {
         
         
         let newWeekly = [c1, c2, c3]
-        user.weeklyChallenges = newWeekly
-        if let encoded = try? JSONEncoder().encode(newWeekly) {
-            user.weeklyData = encoded
+        DispatchQueue.main.async {
+            self.user.weeklyChallenges = newWeekly
+            if let encoded = try? JSONEncoder().encode(newWeekly) {
+                self.user.weeklyData = encoded
+            }
         }
     }
     
@@ -126,13 +135,26 @@ class ChallengeManager {
         ) as? Date ?? .distantPast
         
         if !cal.isDate(lastReset, inSameDayAs: now) {
+            // increment challenges completed and then change it on main thread
+            
+            let progress = calculateChallengeProgress(.daily, user.dailyChallenge.target, user.dailyChallenge.contributionType, date: lastReset, contributions)
+            if progress.1 {
+                DispatchQueue.main.async {
+                    self.user.dailyChallengesCompleted += 1
+                }
+            }
             rerollDailyChallenge()
+            
+            
             UserDefaults.standard.set(now, forKey: ResetKey.daily)
             
-            if (!user.isStreakCompletedToday) { user.streak = 0 }
+
             
-            user.isStreakCompletedToday = false
-            user.playedStreakAnimation = false
+            DispatchQueue.main.async {
+                if !self.user.isStreakCompletedToday { self.user.streak = 0 }
+                self.user.isStreakCompletedToday = false
+                self.user.playedStreakAnimation = false
+            }
         }
     }
     
@@ -148,7 +170,7 @@ class ChallengeManager {
         let thisWeek = cal.component(.weekOfYear, from: now)
         
         if lastWeek != thisWeek {
-            for _ in user.weeklyChallenges {
+            for challenge in user.weeklyChallenges {
                 // Evaluate the previous week by passing a date from last week
                 _ = cal.nextDate(
                     after: now,
@@ -156,6 +178,14 @@ class ChallengeManager {
                     matchingPolicy: .nextTime,
                     direction: .backward
                 )!
+                
+                let progress = calculateChallengeProgress(.weekly, challenge.target, challenge.contributionType, date: lastReset, contributions)
+                if progress.1 {
+                    DispatchQueue.main.async {
+                        self.user.weeklyChallengesCompleted += 1
+                    }
+                }
+                 
             }
             
             rerollWeeklyChallenges()

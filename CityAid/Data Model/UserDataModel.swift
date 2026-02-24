@@ -3,7 +3,8 @@ internal import CoreData
 import Combine
 import AVFoundation
 
-final class UserData: ObservableObject {
+@MainActor
+class UserData: ObservableObject {
     @AppStorage("Username") var username = "Anonymous Contributor"
     @AppStorage("Bio") var bio = "Aiming to make my city a better place, one contribution at a time."
     @AppStorage("Level") var level = 1

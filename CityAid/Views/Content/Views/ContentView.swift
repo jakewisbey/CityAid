@@ -8,9 +8,10 @@
 import SwiftUI
 import PhotosUI
 internal import CoreData
-import Combine
 import AudioToolbox
+import Combine
 
+@MainActor
 struct ContentView: View {
     // User and Contributions
     @StateObject private var user = UserData()
@@ -52,7 +53,7 @@ struct ContentView: View {
     
     // Time management
     var challengeManager: ChallengeManager {
-        ChallengeManager(user: user)
+        ChallengeManager(user: user, contributions: contributions)
     }
     
     var body: some View {
@@ -137,7 +138,7 @@ struct ContentView: View {
                         if !isExpanded && !valuesTabActive && !popped {
                             QuickLogBubble(
                                            title: "Cleared plant area",
-                                           type: .cleanliness,
+                                           type: .plantcare,
                                            originXCoord: geo.size.width * 1.2,
                                            originYCoord: geo.size.height * 0.35,
                                            xCoord: geo.size.width * 0.65,
@@ -227,7 +228,7 @@ struct ContentView: View {
                             
                             QuickLogBubble(
                                            title: "Held a door open",
-                                           type: .animalcare,
+                                           type: .kindness,
                                            originXCoord: geo.size.width * 1.2,
                                            originYCoord: geo.size.height * 0.65,
                                            xCoord: geo.size.width * 0.67,
@@ -469,9 +470,11 @@ struct ContentView: View {
                     .navigationTransition(.zoom(sourceID: selectedBubbleID, in: buttons))
             }
             .onChange(of: contributions.count) {
-                if !user.playedStreakAnimation && user.isStreakCompletedToday {
-                    showStreakAnimation = true
-                    user.playedStreakAnimation = true
+                DispatchQueue.main.async {
+                    if !user.playedStreakAnimation && user.isStreakCompletedToday {
+                        showStreakAnimation = true
+                        user.playedStreakAnimation = true
+                    }
                 }
             }
             .overlay(
@@ -528,7 +531,7 @@ struct ContentView: View {
         .onReceive(
             NotificationCenter.default.publisher(
                 for: .NSCalendarDayChanged
-            )
+            ).receive(on: RunLoop.main)
         ) { _ in
             challengeManager.handleDailyReset()
             challengeManager.handleWeeklyReset()

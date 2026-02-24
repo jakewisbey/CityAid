@@ -12,7 +12,7 @@ struct ChallengesView: View {
     ) private var contributions: FetchedResults<ContributionEntity>
 
     var challengeManager: ChallengeManager {
-        ChallengeManager(user: user)
+        ChallengeManager(user: user, contributions: contributions)
     }
     
     // Popovers

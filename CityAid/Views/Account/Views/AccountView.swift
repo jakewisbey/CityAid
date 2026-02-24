@@ -14,7 +14,7 @@ struct AccountView: View {
         ContributionManager(user: user, context: context)
     }
     var challengeManager: ChallengeManager {
-        ChallengeManager(user: user)
+        ChallengeManager(user: user, contributions: contributions)
     }
     
     // Other
