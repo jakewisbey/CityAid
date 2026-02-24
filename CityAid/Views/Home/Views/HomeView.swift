@@ -9,6 +9,12 @@ struct HomeView: View{
     var contributionManager: ContributionManager {
         ContributionManager(user: user, context: context)
     }
+    
+    @State var fgCityOffset: CGFloat = 100
+    @State var fgCityOpacity: Double = 0.75
+    
+    @State var titleTextOffset: CGFloat = -10
+    @State var titleTextOpacity: Double = 0
 
     @Binding var backgroundMode : BackgroundMode
     @Environment(\.colorScheme) var colorScheme
@@ -51,10 +57,28 @@ struct HomeView: View{
                     Text("CityAid")
                         .font(.system(size: 44, weight: .bold))
                         .foregroundStyle(.white)
+                        .offset(y: titleTextOffset)
+                        .opacity(titleTextOpacity)
+                        .animation(.interpolatingSpring(stiffness: 50, damping: 15), value: titleTextOffset)
+                    
                     Text("building a brighter city for everyone")
                         .foregroundStyle(.white)
                         .opacity(0.6)
+                        .offset(y: titleTextOffset)
+                        .opacity(titleTextOpacity)
+                        .animation(.interpolatingSpring(stiffness: 50, damping: 15).delay(TimeInterval(0.2)), value: titleTextOffset)
                     
+                    
+                    Image("FgCity")
+                        .resizable()
+                        .scaledToFit()
+                        .blur(radius: 5)
+                        .opacity(fgCityOpacity)
+                        .scaleEffect(x: geo.size.width / 1000 * 6, y: geo.size.height / 1000 * 2)
+                        .position(x: geo.size.width * 0.46, y: geo.size.height * 0.73 + fgCityOffset)
+                        .ignoresSafeArea()
+                        .animation(.interpolatingSpring(stiffness: 50, damping: 15), value: fgCityOffset)
+                        
                 }
                 .padding()
                 .allowsHitTesting(false)
@@ -80,7 +104,7 @@ struct HomeView: View{
                             Text("No contributions yet.")
                                 .font(.system(size: 24, weight: .bold))
                             
-                            Text("Tap the + button to get started.")
+                            Text("Tap the \(Image(systemName: "plus.circle")) button to get started.")
                                 .font(.system(size: 12).italic())
                                 .foregroundStyle(Color(.secondaryLabel))
                         }
@@ -94,7 +118,13 @@ struct HomeView: View{
             
                 
         }
-        
+        .onAppear {
+            fgCityOffset = 0
+            fgCityOpacity = 1
+            
+            titleTextOffset = 0
+            titleTextOpacity = 1
+        }
         .sheet(item: $selectedContribution) { contribution in
             StarTappedView(contribution: contribution)
                 .navigationTransition(.zoom(sourceID: /*"selectedStar.id" -- never seemed to work*/"None", in: starNamespace))

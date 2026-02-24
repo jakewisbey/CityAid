@@ -31,7 +31,7 @@ struct OnboardingSheet: View {
                         VStack (alignment: .leading, spacing: 4) {
                             Text("Log Contributions")
                                 .font(.system(size: 20, weight: .bold))
-                            Text("Log your contributions using the + button and keep a record of all the ways you help your community grow over time")
+                            Text("Log your contributions using the \(Image(systemName: "plus.circle")) button and keep a record of all the ways you help your community grow over time")
                                 .font(.system(size: 12).italic())
                                 .foregroundStyle(.gray)
                         }

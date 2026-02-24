@@ -510,13 +510,8 @@ struct ContentView: View {
 
                 }
         )
-        .onChange(of: quickLogIsExpanded) { _, newValue in
-            if newValue {
-                AudioServicesPlaySystemSound(1156)
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            } else {
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            }
+        .onChange(of: quickLogIsExpanded) {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
         }
         .onChange(of: isExpanded) {
             AudioServicesPlaySystemSound(1156)

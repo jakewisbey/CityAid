@@ -83,13 +83,13 @@ struct StreakAnimation: View {
             pulseSaturationStart = (oldStreak == 0) ? 0 : 1
 
             showBackground = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { showGlow = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { showGlow = true; UIImpactFeedbackGenerator(style: .light).impactOccurred() }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.40) { showIcon = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { showStreakNumbers = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { animateNumbers = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { animateNumbers = true;             UIImpactFeedbackGenerator(style: .heavy).impactOccurred() }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { showBackground = false }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.2) { showGlow = false }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.2) { showGlow = false; UIImpactFeedbackGenerator(style: .light).impactOccurred()}
             DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) { showIcon = false }
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.2) { showStreakNumbers = false }
         }
