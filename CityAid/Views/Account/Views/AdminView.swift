@@ -12,7 +12,7 @@ struct AdminView: View {
     }
 
     @Binding public var quickLogs: [String: Int]
-    
+    let challengeManager: ChallengeManager
     @State private var showDeleteUserDataAlert: Bool = false
     @State private var showDeleteAllContributionsAlert: Bool = false
 
@@ -34,6 +34,17 @@ struct AdminView: View {
                             let randomXp = Int.random(in: 3...6)
                             user.xp += randomXp
                             user.level = CalculateUserLevel()
+                        }
+                }
+                
+                HStack {
+                    Text("Reroll challenges")
+                    Spacer()
+                    Image(systemName: "dice")
+                        .frame(width: 40, height: 40)
+                        .glassEffect(.clear.interactive().tint(.blue))
+                        .onTapGesture {
+                            challengeManager.rerollChallenges()
                         }
                 }
                 

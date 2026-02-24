@@ -75,7 +75,7 @@ struct HomeView: View{
                         .scaledToFit()
                         .blur(radius: 5)
                         .opacity(fgCityOpacity)
-                        .scaleEffect(x: geo.size.width / 1000 * 6 * fgCityScale, y: geo.size.height / 1000 * 3.5)
+                        .scaleEffect(x: geo.size.width / 1000 * 6.5 * fgCityScale, y: geo.size.height / 1000 * 3.5)
                         .position(x: geo.size.width * 0.46, y: geo.size.height * 0.80 + fgCityOffset)
                         .ignoresSafeArea()
                         .animation(.interpolatingSpring(stiffness: 50, damping: 15), value: fgCityOffset)

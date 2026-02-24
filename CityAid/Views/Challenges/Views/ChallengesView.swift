@@ -91,15 +91,6 @@ struct ChallengesView: View {
                             .font(.system(size: 14, weight: .regular))
                             .foregroundStyle(.gray.opacity(0.9))
                             .contentTransition(.numericText())
-                        
-                        Image(systemName: "dice")
-                            .frame(width: 40, height: 40)
-                            .glassEffect(.clear.interactive().tint(.blue))
-                            .onTapGesture {
-                                challengeManager.rerollChallenges()
-                            }
-                        
-                        
                     }
                     .frame(maxWidth: .infinity)
                     

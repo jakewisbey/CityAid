@@ -127,7 +127,7 @@ struct AccountView: View {
                     .foregroundColor(.white.opacity(0.5))
                 ) {
                     NavigationLink("View admin options"){
-                        AdminView(quickLogs: $quickLogs)
+                        AdminView(quickLogs: $quickLogs, challengeManager: challengeManager)
                     }
                 }
             }
