@@ -1,5 +1,6 @@
 import SwiftUI
 import AudioToolbox
+import AVFoundation
 
 struct StarView: View {
     let star: Star
@@ -14,6 +15,31 @@ struct StarView: View {
     @State var scale: CGFloat = 0.5
     @State var opacity: Float = 0
     @State var blurRadius: CGFloat = 10
+    
+    
+    // Star sounds
+    @State var player1: AVAudioPlayer?
+    @State var player2: AVAudioPlayer?
+    @State var player3: AVAudioPlayer?
+    @State var player4: AVAudioPlayer?
+    
+    func playSound1() { play(&player1, named: "twinkle1") }
+    func playSound2() { play(&player2, named: "twinkle2") }
+    func playSound3() { play(&player3, named: "twinkle3") }
+    func playSound4() { play(&player4, named: "twinkle4") }
+
+    func play(_ player: inout AVAudioPlayer?, named name: String) {
+        if let url = Bundle.main.url(forResource: name, withExtension: "mp3") {
+            do {
+                player = try AVAudioPlayer(contentsOf: url)
+                player?.volume = 0.1
+                player?.play()
+            } catch {
+                print("error playing \(name)")
+            }
+        }
+    }
+
     
     var body: some View {
         TimelineView(.animation) { timeline in
@@ -35,7 +61,7 @@ struct StarView: View {
                         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                             
                             withAnimation(.easeInOut(duration: 10).repeatForever(autoreverses: true)) {
-                                glowScale = 1.2
+                                glowScale = 1.3
                             }
                         }
                     }
@@ -57,10 +83,22 @@ struct StarView: View {
             )
             .onTapGesture {
                 onTap?()
-                AudioServicesPlaySystemSound(1156)
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-
                 
+                let randomSoundIndex: Int = Int.random(in: 1...4)
+                switch randomSoundIndex {
+                case 1:
+                    playSound1()
+                case 2:
+                    playSound2()
+                case 3:
+                    playSound3()
+                case 4:
+                    playSound4()
+                default:
+                    playSound1()
+                }
+
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 withAnimation(.spring(response: 0.25, dampingFraction: 0.5, blendDuration: 0)) {
                     isTapped = true
                     scale = 1.15

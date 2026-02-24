@@ -410,7 +410,7 @@ struct ContentView: View {
                                 .blur(radius: quickLogIsExpanded ? 10 : 0)
                                 .frame(width: 100, height: 100)
                                 .offset(x: quickLogIsExpanded || isExpanded ? 10 : 0)
-                                .contentShape(Rectangle().inset(by: -40))
+                                .contentShape(Rectangle().inset(by: -20))
                                 .animation(.spring(response: 0.3, dampingFraction: 0.5), value: popped)
                                 .onTapGesture {
                                     withAnimation {
@@ -436,7 +436,7 @@ struct ContentView: View {
                                 .animation(.spring(response: 0.3, dampingFraction: 0.5), value: popped)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .position(x: !popped ? geo.size.width * 1.1 : geo.size.width * 1.08, y: geo.size.height/2)
+                        .position(x: !popped ? geo.size.width * 1.1 : geo.size.width * 1.08, y: geo.size.height * 0.5)
                     }
                 }
             }

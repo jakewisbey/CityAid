@@ -9,7 +9,7 @@ struct HomeView: View{
     var contributionManager: ContributionManager {
         ContributionManager(user: user, context: context)
     }
-    
+        
     @State var fgCityOffset: CGFloat = -10
     @State var fgCityOpacity: Double = 0.5
     @State var fgCityScale: CGFloat = 0.9
@@ -24,15 +24,13 @@ struct HomeView: View{
     @Namespace public var starNamespace
     @State private var stars: [NSManagedObjectID: Star] = [:]
     let starColours: [Color] = [.yellow, .white]
-    @State private var selectedContribution: ContributionEntity?
-    @State private var selectedStar: Star?
-    
 
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \ContributionEntity.date, ascending: false)]
     ) private var contributions: FetchedResults<ContributionEntity>
     
     var body: some View {
+        
         ZStack {
             Image("BgImage")
                 .resizable()
@@ -41,18 +39,12 @@ struct HomeView: View{
                 .ignoresSafeArea()
             
             ForEach(Array(stars.values), id: \.id) { star in
-                StarView(
-                    star: star,
-                    namespaceID: starNamespace
-                ) {
-                    selectedStar = star
-                    
+                StarView(star: star, namespaceID: starNamespace) {
                     if let contribution = contributions.first(where: { stars[$0.objectID]?.id == star.id }) {
-                        selectedContribution = contribution
                     }
                 }
             }
-            
+
             GeometryReader { geo in
                 VStack(alignment: .leading, spacing: 8) {
                     Text("CityAid")
@@ -127,12 +119,6 @@ struct HomeView: View{
             titleTextOffset = 0
             titleTextOpacity = 1
         }
-        .sheet(item: $selectedContribution) { contribution in
-            StarTappedView(contribution: contribution)
-                .navigationTransition(.zoom(sourceID: /*"selectedStar.id" -- never seemed to work*/"None", in: starNamespace))
-                .frame(maxHeight: UIScreen.main.bounds.height * 0.3)
-            .presentationDetents([.fraction(0.3)])
-        }
     }
     
     
@@ -170,32 +156,6 @@ struct HomeView: View{
     }
 }
 
-struct StarTappedView: View {
-    let contribution: ContributionEntity
-    
-    var body: some View {
-        ZStack(alignment: .topLeading) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(contribution.title ?? "Unknown")
-                    .font(.system(size: 25, weight: .bold))
-                
-                Text(contribution.type ?? TypeOfContribution.other.rawValue)
-                    .font(.system(size: 10, weight: .semibold).italic())
-                    .foregroundStyle(.gray)
-
-                Text(contribution.date ?? .now, style: .date)
-                    .font(.system(size: 10).italic())
-                    .foregroundStyle(.gray)
-                
-                Spacer()
-            }
-            .padding(20)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-}
-
-
 struct Star {
     let id: UUID
     var basePosition: CGPoint
@@ -205,7 +165,24 @@ struct Star {
     let opacity: Float
     let floatAmplifier: CGFloat
 }
+/*
 
 #Preview {
-    HomeView(backgroundMode: .constant(.none), showStreakAnimation: .constant(false))
+    HomeView(
+        backgroundMode: .constant(.none),
+        showStreakAnimation: .constant(false),
+        isExpanded: .constant(false),
+        quickLogIsExpanded: .constant(false),
+        popped: .constant(false)
+    )
+    .environmentObject(UserData())
+    .environment(\.managedObjectContext, PreviewPersistenceController.shared.viewContext)
+}
+*/
+#Preview {
+    ContentView()
+        .environment(
+            \.managedObjectContext,
+            PreviewPersistenceController.shared.viewContext
+        )
 }
