@@ -194,11 +194,9 @@ struct NewContributionSheet: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .buttonStyle(GlassButtonStyle())
                     
-                    Text("Always ensure your contributions are safe, legal and respectful to people and public/private property. Check with your local council or environmental body for any specific guidelines.")
-                        .font(.system(size: 14, weight: .regular))
-                        .italic()
-                        .foregroundStyle(.gray.opacity(0.8))
-                        .padding(.bottom, 8)
+                    Text("Always ensure your contributions are safe, legal and respectful to people and public/private property.\n\nCheck with your local council or environmental body for any specific guidelines.")
+                        .font(.caption.italic())
+                        .foregroundColor(.gray)
                 }
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(30)
