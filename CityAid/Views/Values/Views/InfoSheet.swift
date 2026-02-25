@@ -2,7 +2,6 @@ import SwiftUI
 
 struct InfoSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.colorScheme) var colorScheme
     let type: TypeOfContribution
     
     var config: TypeConfig {

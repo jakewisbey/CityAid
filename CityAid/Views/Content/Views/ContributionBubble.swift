@@ -32,10 +32,9 @@ struct ContributionBubble: View {
             .glassEffectID(id, in: buttons)
 
             .onTapGesture {
-                
+                backgroundMode = .none
                 selectedType = typeOfContribution
                 selectedBubbleID = id
-                backgroundMode = .sheet
                 isExpanded = false
             }
             .position(x: originXCoord, y: originYCoord)

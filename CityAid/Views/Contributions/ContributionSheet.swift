@@ -14,15 +14,13 @@ struct NewContributionSheet: View {
     @FocusState private var isTitleFocused: Bool
 
     // Animation handling
-    @Binding var backgroundMode: BackgroundMode
     @Binding var showStreakAnimation: Bool
 
     
-    init(type: TypeOfContribution, user: UserData, backgroundMode: Binding<BackgroundMode>, showStreakAnimation: Binding<Bool>) {
+    init(type: TypeOfContribution, user: UserData, showStreakAnimation: Binding<Bool>) {
         self.type = type
         self.user = user
         _selectedType = State(initialValue: type)
-        self._backgroundMode = backgroundMode
         self._showStreakAnimation = showStreakAnimation
     }
     
@@ -188,7 +186,6 @@ struct NewContributionSheet: View {
                     
                     Button("Save Contribution") {
                         contributionManager.saveContribution(contributionTitle: contributionTitle, contributionDate: contributionDate, contributionMedia: contributionMedia, selectedType: selectedType, contributionNotes: contributionNotes, showStreakAnimation: $showStreakAnimation)
-                        backgroundMode = .none
                         dismiss()
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -227,7 +224,7 @@ struct NewContributionSheet: View {
     container.loadPersistentStores { _, _ in }
     let context = container.viewContext
 
-    return NewContributionSheet(type: .cleanliness, user: UserData(), backgroundMode: .constant(.none), showStreakAnimation: .constant(false))
+    return NewContributionSheet(type: .cleanliness, user: UserData(), showStreakAnimation: .constant(false))
         .environment(\.managedObjectContext, context)
         .preferredColorScheme(.dark)
 }

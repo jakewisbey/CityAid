@@ -14,9 +14,8 @@ struct ViewContributionSheet: View {
     let user: UserData
     @FocusState private var isTitleFocused: Bool
     
-    @Binding var backgroundMode: BackgroundMode
     
-    init(contribution: ContributionEntity, user: UserData, backgroundMode: Binding<BackgroundMode>, contributionToEdit: Binding<ContributionEntity?>) {
+    init(contribution: ContributionEntity, user: UserData, contributionToEdit: Binding<ContributionEntity?>) {
         self.user = user
         self.contribution = contribution
 
@@ -49,7 +48,6 @@ struct ViewContributionSheet: View {
         }
         _contributionNotes = State(initialValue: contribution.notes ?? "")
         
-        self._backgroundMode = backgroundMode
         self._contributionToEdit = contributionToEdit
     }
     
@@ -233,7 +231,7 @@ struct ViewContributionSheet: View {
     return ViewContributionSheet(
         contribution: contribution,
         user: user,
-        backgroundMode: .constant(.none), contributionToEdit: .constant(nil)
+        contributionToEdit: .constant(nil)
     )
     .environment(\.managedObjectContext, context)
 }

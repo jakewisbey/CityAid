@@ -14,9 +14,8 @@ struct EditContributionSheet: View {
     let user: UserData
     @FocusState private var isTitleFocused: Bool
     
-    @Binding var backgroundMode: BackgroundMode
     
-    init(contribution: ContributionEntity, user: UserData, backgroundMode: Binding<BackgroundMode>) {
+    init(contribution: ContributionEntity, user: UserData) {
         self.user = user
         self.contribution = contribution
 
@@ -48,8 +47,6 @@ struct EditContributionSheet: View {
             _contributionMedia = State(initialValue: [])
         }
         _contributionNotes = State(initialValue: contribution.notes ?? "")
-        
-        self._backgroundMode = backgroundMode
     }
     
     var contributionManager: ContributionManager {
@@ -211,7 +208,6 @@ struct EditContributionSheet: View {
                     
                     Button("Save Contribution") {
                         contributionManager.editContribution(contribution: contribution, contributionTitle: contributionTitle, contributionDate: contributionDate, contributionMedia: contributionMedia, selectedType: selectedType, contributionNotes: contributionNotes)
-                        backgroundMode = .none
                         dismiss()
                     }
                     .frame(maxWidth: .infinity, alignment: .center)

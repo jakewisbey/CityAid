@@ -6,7 +6,6 @@ struct ContributionRow: View, Identifiable {
     let contributionManager: ContributionManager
     let user: UserData
     @ObservedObject var item: ContributionEntity
-    @Binding public var backgroundMode: BackgroundMode
     @Binding public var showStreakAnimation: Bool
     @State private var contributionToEdit: ContributionEntity? = nil
     @Environment(\.managedObjectContext) private var context
@@ -84,12 +83,8 @@ struct ContributionRow: View, Identifiable {
                     Spacer()
                 }
             }
-            .sheet(item: $contributionToEdit, onDismiss: {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    backgroundMode = .none
-                }
-            }) { contribution in
-                EditContributionSheet(contribution: contribution, user: user, backgroundMode: $backgroundMode)
+            .sheet(item: $contributionToEdit) { contribution in
+                EditContributionSheet(contribution: contribution, user: user)
                     .navigationTransition(.zoom(sourceID: id, in: animationNamespace))
             }
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -138,7 +133,7 @@ struct ContributionRow: View, Identifiable {
         }
         
         .sheet(item: $contributionToView) { item in
-            ViewContributionSheet(contribution: item, user: user, backgroundMode: $backgroundMode, contributionToEdit: $contributionToEdit)
+            ViewContributionSheet(contribution: item, user: user, contributionToEdit: $contributionToEdit)
                 .navigationTransition(.zoom(sourceID: id, in: animationNamespace))
         }
     }
@@ -180,7 +175,6 @@ struct ContributionRow: View, Identifiable {
                 contributionManager: manager,
                 user: user,
                 item: item,
-                backgroundMode: .constant(.none),
                 showStreakAnimation: .constant(false)
             )
         }

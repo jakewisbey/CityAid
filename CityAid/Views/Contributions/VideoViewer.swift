@@ -14,6 +14,12 @@ struct VideoViewer: View {
     
     var body: some View {
         ZStack {
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    dismiss()
+                }
+
             VideoPlayer(player: player)
                 .aspectRatio(contentMode: .fit)
             
@@ -40,13 +46,6 @@ struct VideoViewer: View {
                 }
                 .padding()
             }
-            
-            Color.clear
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    dismiss()
-                }
-
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {

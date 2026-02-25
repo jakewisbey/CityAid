@@ -6,7 +6,6 @@ import Combine
 struct AllContributionsSheet: View {
     let user: UserData
     let contributions: FetchedResults<ContributionEntity>
-    @Binding var backgroundMode: BackgroundMode
     @Binding var showStreakAnimation: Bool
     @State private var contributionToEdit: ContributionEntity? = nil
     
@@ -86,7 +85,6 @@ struct AllContributionsSheet: View {
                                     contributionManager: contributionManager,
                                     user: user,
                                     item: item,
-                                    backgroundMode: $backgroundMode,
                                     showStreakAnimation: $showStreakAnimation
                                 )
                                 .transition(.opacity.combined(with: .scale))
@@ -130,12 +128,9 @@ struct AllContributionsSheet: View {
                     .navigationTitle("All Contributions")
                 }
             }
-            .sheet(item: $contributionToEdit, onDismiss: {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    backgroundMode = .none
-                }
-            }) { contribution in
-                EditContributionSheet(contribution: contribution, user: user, backgroundMode: $backgroundMode)
+            .sheet(item: $contributionToEdit
+            ) { contribution in
+                EditContributionSheet(contribution: contribution, user: user)
                     .navigationTransition(.zoom(sourceID: contribution.id, in: editNamespace))
             }
         }

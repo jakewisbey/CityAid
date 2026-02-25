@@ -59,13 +59,13 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             TabView (selection: $selectedTab) {
-                HomeView(backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
+                HomeView(showStreakAnimation: $showStreakAnimation)
                     .tabItem { Label("Home", systemImage: "house.fill") }
                     .tag(Tab.home)
                 ChallengesView(selectedLevelCard: $levelCardSelected, selectedTotalContributionCard: $totalContributionCardSelected)
                     .tabItem { Label("Challenges", systemImage: "crown") }
                     .tag(Tab.challenges)
-                ValuesView(cardSelected: $cardSelected, infoSelectedType: $infoSelectedType, backgroundMode: $backgroundMode, infoNamespace: infoNamespace)
+                ValuesView(cardSelected: $cardSelected, infoSelectedType: $infoSelectedType, infoNamespace: infoNamespace)
                     .tabItem { Label("Values", systemImage: "star") }
                     .tag(Tab.values)
                 AccountView()
@@ -100,15 +100,6 @@ struct ContentView: View {
                     }
                 }
                 .animation(.easeOut(duration: 0.25), value: backgroundMode)
-            
-            LinearGradient(colors: [Color(red: 0/255, green: 0/255, blue: 30/255), .black.opacity(0.3)], startPoint: .top, endPoint: .center)
-                .opacity(backgroundMode == .sheet ? 1 : 0)
-                .ignoresSafeArea()
-                .allowsHitTesting(backgroundMode == .sheet)
-                .onTapGesture {
-                    withAnimation(.spring()) { backgroundMode = .none }
-                }
-                .animation(.easeOut(duration: 0.45), value: backgroundMode)
             
             GeometryReader { geo in
                 RadialGradient(
@@ -374,7 +365,6 @@ struct ContentView: View {
                                             } else {
                                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                                 infoSelectedType = cardSelected
-                                                backgroundMode = .expanded
                                             }
                                         }
                                 }
@@ -445,9 +435,8 @@ struct ContentView: View {
             
             
             // All Contributions Sheet
-            .sheet(isPresented: $showAllContributions, onDismiss: { backgroundMode = .none}
-            ){
-                AllContributionsSheet(user: user, contributions: contributions, backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
+            .sheet(isPresented: $showAllContributions) {
+                AllContributionsSheet(user: user, contributions: contributions, showStreakAnimation: $showStreakAnimation)
                     .navigationTransition(.zoom(sourceID: "AllContributionsButton", in: buttons))
             }
 
@@ -459,14 +448,14 @@ struct ContentView: View {
             }
 
             // Info Sheet
-            .sheet(item: $infoSelectedType, onDismiss: { backgroundMode = .none }) { type in
+            .sheet(item: $infoSelectedType) { type in
                 InfoSheet(type: type)
                     .navigationTransition(.zoom(sourceID: type.rawValue, in: infoNamespace))
             }
             
             // New Contribution Sheet
-            .sheet(item: $selectedType, onDismiss: { backgroundMode = .none } ) { type in
-                NewContributionSheet(type: type, user: user, backgroundMode: $backgroundMode, showStreakAnimation: $showStreakAnimation)
+            .sheet(item: $selectedType) { type in
+                NewContributionSheet(type: type, user: user, showStreakAnimation: $showStreakAnimation)
                     .navigationTransition(.zoom(sourceID: selectedBubbleID, in: buttons))
             }
             .onChange(of: contributions.count) {
@@ -549,7 +538,6 @@ enum Tab {
 enum BackgroundMode {
     case none
     case expanded
-    case sheet
     case quickLog
 }
 

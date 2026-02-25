@@ -2,7 +2,6 @@ import SwiftUI
 
 struct InfoCard: View {
     @Binding public var infoSelectedType: TypeOfContribution?
-    @Binding public var backgroundMode: BackgroundMode
     let imageAddress: String
     let title: String
     let caption: String
@@ -33,7 +32,6 @@ struct InfoCard: View {
                     .onTapGesture() {
                         if isSelected {
                             infoSelectedType = cardSelected
-                            backgroundMode = .expanded
                         }
                     }
             }
@@ -78,8 +76,9 @@ struct InfoCard: View {
                     .padding(.leading, 5)
             }
             .onTapGesture() {
-                if isSelected { infoSelectedType = cardSelected }
-                    backgroundMode = .expanded
+                if isSelected {
+                    infoSelectedType = cardSelected
+                }
             }
             .padding(.top, 225)
         }

@@ -17,7 +17,6 @@ struct HomeView: View{
     @State var titleTextOffset: CGFloat = -10
     @State var titleTextOpacity: Double = 0
 
-    @Binding var backgroundMode : BackgroundMode
     @Environment(\.colorScheme) var colorScheme
     @Binding var showStreakAnimation: Bool
 
@@ -165,20 +164,7 @@ struct Star {
     let opacity: Float
     let floatAmplifier: CGFloat
 }
-/*
 
-#Preview {
-    HomeView(
-        backgroundMode: .constant(.none),
-        showStreakAnimation: .constant(false),
-        isExpanded: .constant(false),
-        quickLogIsExpanded: .constant(false),
-        popped: .constant(false)
-    )
-    .environmentObject(UserData())
-    .environment(\.managedObjectContext, PreviewPersistenceController.shared.viewContext)
-}
-*/
 #Preview {
     ContentView()
         .environment(
