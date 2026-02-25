@@ -39,12 +39,14 @@ struct MediaPickerRow: View {
                                     .clipped()
                                     .cornerRadius(15)
                                 
-                                Image(systemName: "play.circle.fill")
+                                Image(systemName: "play.fill")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 30, height: 30)
                                     .foregroundColor(.white)
                             }
+                            .contentShape(Rectangle())
+                            .matchedTransitionSource(id: "video-\(index)", in: pickerNamespace)
                             .onTapGesture {
                                 onVideoTap(index, url)
                             }
@@ -63,6 +65,7 @@ struct MediaPickerRow: View {
                                     .foregroundColor(.white)
 
                             }
+                            .matchedTransitionSource(id: "video-\(index)", in: pickerNamespace)
                             .onTapGesture {
                                 onVideoTap(index, url)
                             }
