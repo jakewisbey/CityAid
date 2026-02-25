@@ -250,7 +250,7 @@ struct ChallengesView: View {
                             let horizontalPadding = max((proxy.size.width - 200) / 2, 0)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
-                                HStack {
+                                HStack{
                                     ForEach(totalContributionMilestones) { milestone in
                                         TotalContributionMilestoneCard(id: milestone.id, milestone: milestone, title: milestone.title, caption: milestone.description, selectedTotalContributionCard: selectedTotalContributionCard, contributions: contributions)
                                     }

@@ -122,6 +122,7 @@ struct ContributionRow: View, Identifiable {
                 .tint(.green)
             }
         }
+        .contentShape(Rectangle())
         .matchedTransitionSource(id: id, in: animationNamespace)
         .onTapGesture {
             contributionToView = item

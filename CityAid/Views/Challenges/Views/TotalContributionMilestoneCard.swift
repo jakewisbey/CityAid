@@ -16,7 +16,8 @@ struct TotalContributionMilestoneCard: View {
         ZStack {
             HStack {
                 Text(String(milestone.amount))
-                    .font(.system(size: 70, weight: .bold))
+                    .font(.system(size: milestone.amount >= 100 ? 55 : 65, weight: .bold))
+                    .allowsTightening(true)
                     .foregroundStyle(LinearGradient(
                         colors: [.black, .orange, .red, .blue, .purple, .yellow],
                     startPoint: UnitPoint(x: 0, y: 1),
@@ -42,7 +43,6 @@ struct TotalContributionMilestoneCard: View {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         }
                     }
-
                 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)
@@ -57,6 +57,7 @@ struct TotalContributionMilestoneCard: View {
                         .italic()
                         .foregroundStyle(Color(.secondaryLabel))
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(1)
                         .padding(.leading, 5)
 
                     let completionStatus = milestone.amount <= contributions.count ? "Completed" : "Not completed"
@@ -66,17 +67,20 @@ struct TotalContributionMilestoneCard: View {
                             .font(.system(size: 12))
                             .foregroundStyle(Color(.secondaryLabel))
                             .padding(.leading, 5)
+                            .lineLimit(1)
                         
                         Text(completionStatus)
                             .font(.system(size: 12))
                             .foregroundStyle(Color(completionStatus == "Completed" ? .green : .red))
+                            .lineLimit(1)
                     }
 
                 }
 
             }
+            .padding(.leading, 30)
             .frame(width: 300, height: 120)
-            .fixedSize()
+            
         }
         .scaleEffect(isSelected ? 1.0 : 0.8, anchor: .bottom)
         .saturation(isSelected ? 1.0 : 0.0)

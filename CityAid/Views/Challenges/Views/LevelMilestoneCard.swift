@@ -16,33 +16,31 @@ struct LevelMilestoneCard: View {
     var body: some View {
         ZStack {
             HStack {
-                    Image(badge)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: 100, maxHeight: 100)
-                        .scaleEffect(isTapped ? 1.2 : 1)
-                        .animation(.interpolatingSpring(stiffness: 150, damping: 10), value: isTapped)
-                        .allowsHitTesting(isSelected)
-                        .gesture(
-                            DragGesture(minimumDistance: 0)
-                                    .onChanged { _ in
-                                        if !isTapped { isTapped = true }
-                                    }
-                                    .onEnded { _ in
-                                        isTapped = false
-                                    }
-                            )
-                        .onChange(of: isTapped) { _, newValue in
-                            if newValue {
-                                AudioServicesPlaySystemSound(1156)
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            } else {
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            }
+                Image(badge)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 100, maxHeight: 100)
+                    .scaleEffect(isTapped ? 1.2 : 1)
+                    .animation(.interpolatingSpring(stiffness: 150, damping: 10), value: isTapped)
+                    .allowsHitTesting(isSelected)
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                                .onChanged { _ in
+                                    if !isTapped { isTapped = true }
+                                }
+                                .onEnded { _ in
+                                    isTapped = false
+                                }
+                        )
+                    .onChange(of: isTapped) { _, newValue in
+                        if newValue {
+                            AudioServicesPlaySystemSound(1156)
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        } else {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         }
-
+                    }
                 
-
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)
                         .font(.system(size: 20, weight: .bold))
@@ -75,6 +73,7 @@ struct LevelMilestoneCard: View {
                 }
 
             }
+            .padding(.leading, 30)
             .frame(width: 300, height: 120)
             .fixedSize()
         }
