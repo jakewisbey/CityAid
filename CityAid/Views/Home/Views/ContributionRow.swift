@@ -12,6 +12,8 @@ struct ContributionRow: View, Identifiable {
     @Environment(\.managedObjectContext) private var context
     @Namespace var animationNamespace
     
+    @State var contributionToView: ContributionEntity?
+    
     @State private var imgPath: String = ""
     @State private var imgBgColour: Color = .black
     var iconName: String {
@@ -47,7 +49,6 @@ struct ContributionRow: View, Identifiable {
         }
     }
 
-
     var body: some View {
         ZStack {
             HStack {
@@ -71,7 +72,6 @@ struct ContributionRow: View, Identifiable {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .frame(maxHeight: .infinity)
-                .matchedTransitionSource(id: id, in: animationNamespace)
                 Spacer()
                 
                 VStack {
@@ -108,31 +108,38 @@ struct ContributionRow: View, Identifiable {
                 .tint(.blue)
                 
                 Menu {
-                    ControlGroup {
-                        Button {
-                            contributionManager.duplicateContribution(contribution: item, duplicateDate: false, user: user)
-                        } label: {
-                            Label("Today's date", systemImage: "calendar")
-                        }
-                        .tint(.white)
-                        
-                        Button {
-                            contributionManager.duplicateContribution(contribution: item, duplicateDate: true, user: user)
-                        } label: {
-                            Label("Keep original", systemImage: "calendar.badge.clock")
-                        }
-                        .tint(.white)
+                    Button {
+                        contributionManager.duplicateContribution(contribution: item, duplicateDate: false, user: user)
+                    } label: {
+                        Label("Today's date", systemImage: "calendar")
                     }
+                    .tint(.white)
+                    
+                    Button {
+                        contributionManager.duplicateContribution(contribution: item, duplicateDate: true, user: user)
+                    } label: {
+                        Label("Keep original", systemImage: "calendar.badge.clock")
+                    }
+                    .tint(.white)
                 } label: {
                     Label("Duplicate", systemImage: "document.on.document")
                 }
                 .tint(.green)
             }
         }
+        .matchedTransitionSource(id: id, in: animationNamespace)
+        .onTapGesture {
+            contributionToView = item
+        }
         .frame(height: 40)
         .onAppear {
             imgPath = iconName
             imgBgColour = gradientColour
+        }
+        
+        .sheet(item: $contributionToView) { item in
+            ViewContributionSheet(contribution: item, user: user, backgroundMode: $backgroundMode, contributionToEdit: $contributionToEdit)
+                .navigationTransition(.zoom(sourceID: id, in: animationNamespace))
         }
     }
 }

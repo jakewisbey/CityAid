@@ -21,37 +21,92 @@ class ContributionManager {
         )
     }
     
+    // Had in-built Apple Intelligence help with this one, as was having a lot of trouble storing videos
+    // however, it was my idea to convert all videos to mp4 before saving because photos picker apparently can't handle other types of video, but this is quite slow for videos which are not already compatible
     func handlePickerItem(item: PhotosPickerItem, contributionMedia: Binding<[MediaItem]>) {
         item.loadTransferable(type: Data.self) { result in
-            if case .success(let data?) = result,
-               let image = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    contributionMedia.wrappedValue.append(.photo(image))
+            switch result {
+            case .success(let data?):
+                if let image = UIImage(data: data) {
+                    // image case
+                    DispatchQueue.main.async {
+                        contributionMedia.wrappedValue.append(.photo(image))
+                    }
+                } else {
+                    // treat as video
+                    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mov")
+                    do {
+                        try data.write(to: tempURL)
+                    } catch {
+                        print("failed to save video data:", error)
+                        return
+                    }
+
+                    // check if conversion is needed
+                    let fileExtension = tempURL.pathExtension.lowercased()
+                    if fileExtension == "mov" || fileExtension == "mp4" {
+                        // likely compatible, append directly
+                        DispatchQueue.main.async {
+                            contributionMedia.wrappedValue.append(.video(tempURL))
+                        }
+                    } else {
+                        // export to mp4
+                        let asset = AVURLAsset(url: tempURL)
+                        guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
+                            print("Could not create export session")
+                            return
+                        }
+                        let mp4URL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mp4")
+                        exportSession.outputURL = mp4URL
+                        exportSession.outputFileType = .mp4
+                        exportSession.exportAsynchronously {
+                            if exportSession.status == .completed {
+                                DispatchQueue.main.async {
+                                    contributionMedia.wrappedValue.append(.video(mp4URL))
+                                }
+                            } else {
+                                print("Video export failed:", exportSession.error?.localizedDescription ?? "unknown error")
+                            }
+                        }
+                    }
                 }
+            case .success(nil):
+                print("No data returned from picker item")
+            case .failure(let error):
+                print("failed to load transferable:", error)
             }
         }
     }
-    
+
     func textFieldDidBeginEditing(_ textField: UITextField) {
         DispatchQueue.main.async {
             textField.selectedTextRange = textField.textRange(from: textField.beginningOfDocument, to: textField.endOfDocument)
         }
     }
     
-    func generateThumbnail(from url: URL, at time: CMTime = CMTime(seconds: 1, preferredTimescale: 600)) -> UIImage? {
-        let asset = AVAsset(url: url)
-        let imageGenerator = AVAssetImageGenerator(asset: asset)
-        imageGenerator.appliesPreferredTrackTransform = true
-        
+    // Source - https://stackoverflow.com/a/40987452
+    // Posted by David Seek, modified by community. See post 'Timeline' for change history
+    // Retrieved 2026-02-25, License - CC BY-SA 4.0
+
+    func generateThumbnail(path: URL) -> UIImage? {
         do {
-            let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
-            return UIImage(cgImage: cgImage)
-        } catch {
-            print("Error generating thumbnail: \(error)")
+            let asset = AVURLAsset(url: path, options: nil)
+            let imgGenerator = AVAssetImageGenerator(asset: asset)
+            imgGenerator.appliesPreferredTrackTransform = true
+            let cgImage = try imgGenerator.copyCGImage(at: CMTimeMake(value: 0, timescale: 1), actualTime: nil)
+            let thumbnail = UIImage(cgImage: cgImage)
+            return thumbnail
+        } catch let error {
+            print("*** Error generating thumbnail: \(error.localizedDescription)")
             return nil
         }
     }
-    
+
+    // Convenience overload to match call sites using `from:`
+    func generateThumbnail(from url: URL) -> UIImage? {
+        return generateThumbnail(path: url)
+    }
+
     
     func saveContribution(contributionTitle: String, contributionDate: Date, contributionMedia: [MediaItem], selectedType: TypeOfContribution, contributionNotes: String, showStreakAnimation: Binding<Bool>) {
 
@@ -216,8 +271,11 @@ class ContributionManager {
             duplicateContribution.date = Date()
         }
         
+        duplicateContribution.media = contribution.media
+
         duplicateContribution.xp = contribution.xp
         user.xp += Int(duplicateContribution.xp)
+        duplicateContribution.notes = contribution.notes
         
         do {
             try context.save()
@@ -270,7 +328,7 @@ class ContributionManager {
                 let url = URL(fileURLWithPath: path)
                 if path.hasSuffix(".jpg"), let image = UIImage(contentsOfFile: path) {
                     return .photo(image)
-                } else if path.hasSuffix(".mp4") {
+                } else if path.lowercased().hasSuffix(".mp4") || path.lowercased().hasSuffix(".mov") || path.lowercased().hasSuffix(".m4v") {
                     return .video(url)
                 }
                 return nil

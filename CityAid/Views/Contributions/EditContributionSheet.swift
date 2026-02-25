@@ -67,6 +67,9 @@ struct EditContributionSheet: View {
     @State private var tappedPhotoID: String? = nil
     @State private var photoViewerImage: UIImage? = nil
     
+    @State private var tappedVideoID: String? = nil
+    @State private var videoViewerURL: URL? = nil
+
     
     var body: some View {
         ZStack {
@@ -154,10 +157,10 @@ struct EditContributionSheet: View {
                     MediaPickerRow(contributionMedia: $contributionMedia,
                                    selectedItems: $selectedItems,
                                    contributionManager: contributionManager,
-                                   onImageTap: {
-                                    index, image in photoViewerImage = image; tappedPhotoID = "photo-\(index)"
-                                    },
-                                   pickerNamespace: pickerNamespace)
+                                   onImageTap: { index, image in photoViewerImage = image; tappedPhotoID = "photo-\(index)" },
+                                   onVideoTap: { index, url in videoViewerURL = url; tappedVideoID = "video-\(index)"},
+                                   pickerNamespace: pickerNamespace,
+                                   showPicker: true)
                         .onChange(of: selectedItems) { oldItems, newItems in
                         contributionMedia.removeAll()
                         
@@ -174,7 +177,20 @@ struct EditContributionSheet: View {
                                 .navigationTransition(.zoom(sourceID: sourceID, in: pickerNamespace))
                         }
                     }
-                    
+                    .sheet(isPresented: Binding(
+                        get: { videoViewerURL != nil },
+                        set: { if !$0 { videoViewerURL = nil; tappedVideoID = nil } }
+                    )) {
+                        if let url = videoViewerURL, let sourceID = tappedVideoID {
+                            VideoViewer(videoURL: url)
+                                .navigationTransition(.zoom(sourceID: sourceID, in: pickerNamespace))
+                        }
+                    }
+
+                    Text("Videos can take a few seconds to load. Keep them short and wait until loading finishes before saving.")
+                        .font(.caption.italic())
+                        .foregroundColor(.gray)
+                        .padding(.top, -5)
                     
                     Text("Notes")
                         .font(.system(size: 20))

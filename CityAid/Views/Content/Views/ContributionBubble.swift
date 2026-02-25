@@ -1,4 +1,5 @@
 import SwiftUI
+internal import CoreData
 
 struct ContributionBubble: View {
     let iconName: String

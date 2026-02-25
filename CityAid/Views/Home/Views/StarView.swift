@@ -32,7 +32,7 @@ struct StarView: View {
         if let url = Bundle.main.url(forResource: name, withExtension: "mp3") {
             do {
                 player = try AVAudioPlayer(contentsOf: url)
-                player?.volume = 0.1
+                player?.volume = 0.2
                 player?.play()
             } catch {
                 print("error playing \(name)")
