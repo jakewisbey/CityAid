@@ -62,7 +62,7 @@ struct ChallengesView: View {
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Daily Challenges")
                                         .font(.system(size: 26, weight: .bold))
-                                    Text("Daily challenges encourage you to contribution to your community at least one time a day.\n\nComplete a challenge each day to keep your daily streak!")
+                                    Text("Daily challenges encourage you to contribute to your community at least one time a day.\n\nComplete a challenge each day to keep your daily streak!")
                                 }
                                 .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
                                 .padding()
@@ -115,7 +115,7 @@ struct ChallengesView: View {
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Weekly Challenges")
                                         .font(.system(size: 26, weight: .bold))
-                                    Text("Weekly challenges are harder, but more rewarding than daily challenges, designed to encourage you to contribute even more to your community.\n\nTry to complete all 3 each week to earn extra xp!")
+                                    Text("Weekly challenges are harder, but more rewarding than daily challenges, designed to encourage you to contribute to your community even more.\n\nTry to complete all 3 each week to earn extra xp!")
                                 }
                                 .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
                                 .padding()
@@ -496,7 +496,7 @@ let totalContributionMilestones: [TotalContributionMilestone] = [
     TotalContributionMilestone(amount: 50, title: "Active Member", description: "Log 50 contributions", xp: 10),
     TotalContributionMilestone(amount: 75, title: "Trusted Contributor", description: "Log 75 contributions", xp: 10),
     TotalContributionMilestone(amount: 100, title: "Dedicated Contributor", description: "Log 100 contributions", xp: 10),
-    TotalContributionMilestone(amount: 150, title: "Impact maker", description: "Log 150 contributions", xp: 15),
+    TotalContributionMilestone(amount: 150, title: "Impact Maker", description: "Log 150 contributions", xp: 15),
     TotalContributionMilestone(amount: 200, title: "City Saviour", description: "Log 200 contributions", xp: 15),
 ]
 

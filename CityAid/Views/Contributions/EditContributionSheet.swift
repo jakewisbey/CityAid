@@ -224,6 +224,14 @@ struct EditContributionSheet: View {
             }
         }
         .onAppear {
+            if contributionTitle == "Untitled Contribution" {
+                contributionTitle = ""
+            }
+            
+            if contributionNotes == "No notes" {
+                contributionNotes = ""
+            }
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 isTitleFocused = true
             }

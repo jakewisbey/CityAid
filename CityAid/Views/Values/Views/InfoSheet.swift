@@ -10,7 +10,7 @@ struct InfoSheet: View {
             return .init(imageAddress: "CleanlinessBg",
                          title: "Cleanliness",
                          caption: "Clean our streets of litter and polution.",
-                         cityEffects: ["62% of people in England drop litter", "Nine billion tonnes of litter ends up in the oceans across the planet each year", "Cleaning up litter from UK streets costs British taxpayers £500 million every year"],
+                         cityEffects: ["62% of people in England drop litter", "Nine billion tonnes of litter ends up in our oceans across the planet each year", "Cleaning up litter from UK streets costs British taxpayers £500 million every year"],
                          mainInfo: "By helping clean up local streets and parks, you make your community safer, more welcoming, and healthier. Every piece of litter removed or area tidied encourages others to care for their surroundings to produce a lasting effect of change and sustainability.",
                          contributionOptions: ["Pick up litter", "Report damaged/vandalised areas to your local council", "Support local recycling programs"]
             )
@@ -18,7 +18,7 @@ struct InfoSheet: View {
             return .init(imageAddress: "PlantcareBg",
                          title: "Plant Care",
                          caption: "Restore green spaces to help your city breathe.",
-                         cityEffects: ["Plant life in cities has overall been declining", "The NHS could save over £2 billion in treatment costs if everyone in England had equal access to good quality green space", "Plant life can have a positive effect on your mental health"],
+                         cityEffects: ["Plant life in cities has overall been declining", "£2 billion could be saved if everyone in England had access to good quality green space", "Plant life can have a positive effect on your mental health"],
                          mainInfo: "Not only do plants improve our quality of life, but they help reduce the risk of flooding, improve air quality, and provide habitats for wildlife. By taking care of local greenery, you contribute to a healthier environment for everyone.",
                          contributionOptions: ["Take care of local greenery", "Volunteer at parks or community gardens", "Report invasive species to your local council"]
             )
@@ -42,8 +42,8 @@ struct InfoSheet: View {
             return .init(imageAddress: "AnimalcareBg",
                          title: "Animal Care",
                          caption: "Take care of animals in your city to help them thrive.",
-                         cityEffects: ["An estimated 70 million cats are stray in the United States", "Only 1 out of every 10 dogs born will find a permanent home", "Approximately 2.7 million dogs and cats are killed every year because shelters are too full"],
-                         mainInfo: "The biggest change you can make to help animals in need is fostering or adopting one from a shelter. However,even small things, like safely sharing food or helping meet basic needs, can make a real difference in their wellbeing.",
+                         cityEffects: ["An estimated 70 million cats are stray in the United States", "Only 1 out of every 10 dogs born will find a permanent home", "2.7 million dogs and cats are killed every year because shelters are too full"],
+                         mainInfo: "The biggest change you can make to help animals in need is fostering or adopting one from a shelter. However, even small things, like sharing food or helping meet basic needs, can make a positive difference in their wellbeing.",
                          contributionOptions: ["Help an animal in need", "Adopt animals from shelters", "Feed stray animals"]
             )
         default:

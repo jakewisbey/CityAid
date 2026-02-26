@@ -34,7 +34,7 @@ struct ValuesView: View {
                     Spacer().frame(height: 130)
                     Text("Why do your contributions matter?")
                         .font(.system(size: 32, weight: .bold))
-                    Text("Every contribution counts - even a one-time act of kindness can make a lasting difference in your community. Learn how and why each action makes an impact.")
+                    Text("Every contribution counts - even a one-time act of kindness can make a lasting difference in someone's day. Learn how and why each action makes an impact.")
                         .font(.system(size: 16).italic())
                         .foregroundStyle(Color(.secondaryLabel))
                 }

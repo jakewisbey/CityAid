@@ -131,7 +131,6 @@ struct ContentView: View {
                     // Hold Add button and ContributionBubbles
                     ZStack {
                         // ContributionBubbles
-                        
                         if !isExpanded && !valuesTabActive && !popped {
                             QuickLogBubble(
                                            title: "Cleared plant area",
@@ -397,48 +396,61 @@ struct ContentView: View {
                                 
                             }
                         }
-                    }
-                    
-                    if selectedTab == .home {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 20)
-                                .foregroundStyle(.ultraThinMaterial)
-                                .blur(radius: quickLogIsExpanded ? 10 : 0)
-                                .frame(width: 100, height: 100)
-                                .offset(x: quickLogIsExpanded || isExpanded ? 10 : 0)
-                                .contentShape(Rectangle().inset(by: -20))
-                                .animation(.spring(response: 0.3, dampingFraction: 0.5), value: popped)
-                                .onTapGesture {
-                                    withAnimation {
-                                        popped = true
-                                        backgroundMode = .expanded
-                                    }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                        
+                        Color.black
+                            .opacity(backgroundMode == .popped ? 0.5 : 0)
+                            .ignoresSafeArea()
+                            .allowsHitTesting(backgroundMode == .popped)
+                            .onTapGesture {
+                                withAnimation(.spring()) {
+                                    backgroundMode = .none
+                                    isExpanded = false
+                                    quickLogIsExpanded = false
+                                    popped = false
+                                }
+                            }
+                            .animation(.easeOut(duration: 0.25), value: backgroundMode)
+                        
+                        if selectedTab == .home {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 20)
+                                    .foregroundStyle(.ultraThinMaterial)
+                                    .blur(radius: quickLogIsExpanded ? 10 : 0)
+                                    .frame(width: 100, height: 100)
+                                    .offset(x: quickLogIsExpanded || isExpanded ? 10 : 0)
+                                    .contentShape(Rectangle().inset(by: -20))
+                                    .animation(.spring(response: 0.3, dampingFraction: 0.5), value: popped)
+                                    .onTapGesture {
                                         withAnimation {
-                                            popped = false
-                                            
-                                            if !isExpanded { backgroundMode = .none }
+                                            popped = true
+                                            backgroundMode = .popped
+                                        }
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                                            withAnimation {
+                                                popped = false
+                                                
+                                                if !isExpanded { backgroundMode = .none }
+                                            }
                                         }
                                     }
-                                }
-                                .allowsHitTesting(!popped && !quickLogIsExpanded && !isExpanded)
-                            
-                            
-                            Text("Swipe left!")
-                                .font(.system(size: 25, weight: .bold))
-                                .opacity(popped ? 1 : 0)
-                                .offset(x: popped ? -130 : -100)
-                                .blur(radius: popped ? 0 : 10)
-                                .animation(.spring(response: 0.3, dampingFraction: 0.5), value: popped)
+                                    .allowsHitTesting(!popped && !quickLogIsExpanded && !isExpanded)
+                                
+                                
+                                Text("Swipe left!")
+                                    .font(.system(size: 25, weight: .bold))
+                                    .opacity(popped ? 1 : 0)
+                                    .offset(x: popped ? -130 : -100)
+                                    .blur(radius: popped ? 0 : 10)
+                                    .animation(.spring(response: 0.3, dampingFraction: 0.5), value: popped)
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .position(x: !popped ? geo.size.width * 1.1 : geo.size.width * 1.08, y: geo.size.height * 0.5)
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .position(x: !popped ? geo.size.width * 1.1 : geo.size.width * 1.08, y: geo.size.height * 0.5)
                     }
                 }
             }
             .padding(.bottom, 75)
             .ignoresSafeArea(.keyboard)
-            
             
             // All Contributions Sheet
             .sheet(isPresented: $showAllContributions) {
@@ -544,6 +556,7 @@ enum Tab {
 enum BackgroundMode {
     case none
     case expanded
+    case popped
     case quickLog
 }
 
