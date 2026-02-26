@@ -27,11 +27,10 @@ struct VideoViewer: View {
                 HStack {
                     Spacer()
                     Image(systemName: "checkmark")
-                        .font(.system(size: 20))
-                        .foregroundStyle(.opacity(0.9))
-                        .frame(width: 45, height: 45)
+                        .font(.system(size: 26))
+                        .foregroundColor(.white)
+                        .frame(width: 50, height: 50)
                         .glassEffect(.clear.interactive().tint(.blue))
-                        .padding(5)
                 }
                 .padding()
 

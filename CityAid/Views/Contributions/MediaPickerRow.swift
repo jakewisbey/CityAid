@@ -17,17 +17,27 @@ struct MediaPickerRow: View {
                     let media = contributionMedia[index]
                     switch media {
                     case .photo(let image):
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 100, height: 100)
-                            .clipped()
-                            .cornerRadius(15)
-                            .matchedTransitionSource(id: "photo-\(index)", in: pickerNamespace)
-                            .onTapGesture {
-                                onImageTap(index, image)
-                            }
-                        
+                        ZStack {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(width: 100, height: 100)
+                                .cornerRadius(15)
+                            
+                            Text("Failed to load")
+                                .font(.system(size: 10).italic())
+                                .foregroundStyle(.gray)
+
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 100, height: 100)
+                                .clipped()
+                                .cornerRadius(15)
+                                .matchedTransitionSource(id: "photo-\(index)", in: pickerNamespace)
+                                .onTapGesture {
+                                    onImageTap(index, image)
+                                }
+                        }
                     case .video(let url):
                         if let thumbnail = contributionManager.generateThumbnail(path: url) {
                             let _ = print("video at index \(index), url: \(url)")
@@ -58,12 +68,9 @@ struct MediaPickerRow: View {
                                     .frame(width: 100, height: 100)
                                     .cornerRadius(15)
                                 
-                                Image(systemName: "play.fill")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 30, height: 30)
-                                    .foregroundColor(.white)
-
+                                Text("Failed to load")
+                                    .font(.system(size: 10).italic())
+                                    .foregroundStyle(.gray)
                             }
                             .matchedTransitionSource(id: "video-\(index)", in: pickerNamespace)
                             .onTapGesture {

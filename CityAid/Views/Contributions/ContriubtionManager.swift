@@ -110,23 +110,23 @@ class ContributionManager {
     
     func saveContribution(contributionTitle: String, contributionDate: Date, contributionMedia: [MediaItem], selectedType: TypeOfContribution, contributionNotes: String, showStreakAnimation: Binding<Bool>) {
 
-        let entity = ContributionEntity(context: context)
-        entity.id = UUID()
+        let contribution = ContributionEntity(context: context)
+        contribution.id = UUID()
         
         
         if contributionTitle.isEmpty {
-            entity.title = "Unnamed Contribution"
+            contribution.title = "Unnamed Contribution"
         } else {
-            entity.title = contributionTitle
+            contribution.title = contributionTitle
         }
         
-        entity.date = contributionDate
-        entity.type = selectedType.rawValue
+        contribution.date = contributionDate
+        contribution.type = selectedType.rawValue
         
         if contributionNotes.isEmpty {
-            entity.notes = "No notes"
+            contribution.notes = "No notes"
         } else {
-            entity.notes = contributionNotes
+            contribution.notes = contributionNotes
         }
         
         
@@ -153,14 +153,14 @@ class ContributionManager {
 
         // convert to data and store
         do {
-            entity.media = try JSONEncoder().encode(mediaData)
+            contribution.media = try JSONEncoder().encode(mediaData)
         } catch {
             print("media encode failed", error)
-            entity.media = Data()
+            contribution.media = Data()
         }
         
         let randomXp = Int.random(in: 4...8)
-        entity.xp = Int16(randomXp)
+        contribution.xp = Int16(randomXp)
         user.xp += randomXp
         user.CalculateUserLevel()
         
@@ -185,8 +185,12 @@ class ContributionManager {
         contribution.title = contributionTitle
         contribution.date = contributionDate
         contribution.type = selectedType.rawValue
-        contribution.notes = contributionNotes
-        
+        if contributionNotes.isEmpty {
+            contribution.notes = "No notes"
+        } else {
+            contribution.notes = contributionNotes
+        }
+
         var mediaData: [String] = []
         
         // handle media stuff

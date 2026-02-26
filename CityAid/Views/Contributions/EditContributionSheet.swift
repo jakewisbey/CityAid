@@ -222,10 +222,7 @@ struct EditContributionSheet: View {
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(30)
             }
-            .scrollDisabled(true)
-            .ignoresSafeArea(.keyboard)
         }
-        .ignoresSafeArea(.keyboard)
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 isTitleFocused = true

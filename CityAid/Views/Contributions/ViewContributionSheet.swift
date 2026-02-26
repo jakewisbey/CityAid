@@ -22,6 +22,7 @@ struct ViewContributionSheet: View {
         let initialType = TypeOfContribution(rawValue: contribution.type ?? "Cleanliness") ?? .cleanliness
         _selectedType = State(initialValue: initialType)
 
+        _contributionID = State(initialValue: contribution.id?.uuidString ?? "")
         _contributionTitle = State(initialValue: contribution.title ?? "")
         _contributionType = State(initialValue: initialType)
         _contributionDate = State(initialValue: contribution.date ?? Date())
@@ -55,6 +56,7 @@ struct ViewContributionSheet: View {
         ContributionManager(user: user, context: context)
     }
     
+    @State private var contributionID: String
     @State private var contributionTitle: String = ""
     @State private var contributionType: TypeOfContribution = .cleanliness
     @State private var contributionDate: Date = Date()
@@ -74,128 +76,143 @@ struct ViewContributionSheet: View {
     
     var body: some View {
         ZStack {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
+            NavigationStack {
+                List {
+                    Section (header: Text("Attributes")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white.opacity(0.5)),
+                             footer: Text("ID: " + contributionID)
+                    ) {
+                        HStack(spacing: 2) {
+                            Text("Type:")
+                            Spacer()
+                            Text(contribution.type ?? "Error")
+                        }
+                        
+                        
+                        HStack {
+                            Text("Date:")
+                            Spacer()
+                            Text(contributionDate, format: .dateTime.day(.twoDigits).month(.twoDigits).year())
+                        }
+                        
+                        VStack {
+                            if contributionMedia.count == 0 {
+                                HStack {
+                                    Text("Photos & Videos")
+                                    Spacer()
+                                    Text("None")
+                                }
+                            } else {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("Photos & Videos")
+                                    
+                                    MediaPickerRow(contributionMedia: $contributionMedia,
+                                                   selectedItems: $selectedItems,
+                                                   contributionManager: contributionManager,
+                                                   onImageTap: { index, image in photoViewerImage = image; tappedPhotoID = "photo-\(index)"},
+                                                   onVideoTap: { index, url in videoViewerURL = url; tappedVideoID = "video-\(index)"},
+                                                   pickerNamespace: pickerNamespace,
+                                                   showPicker: false)
+                                    .onChange(of: selectedItems) { oldItems, newItems in
+                                        contributionMedia.removeAll()
+                                        
+                                        for item in newItems {
+                                            contributionManager.handlePickerItem(item: item, contributionMedia: $contributionMedia)
+                                        }
+                                    }
+                                    .sheet(isPresented: Binding(
+                                        get: { photoViewerImage != nil },
+                                        set: { if !$0 { photoViewerImage = nil; tappedPhotoID = nil } }
+                                    )) {
+                                        if let image = photoViewerImage, let sourceID = tappedPhotoID {
+                                            PhotoViewer(image: image)
+                                                .navigationTransition(.zoom(sourceID: sourceID, in: pickerNamespace))
+                                        }
+                                    }
+                                    .sheet(isPresented: Binding(
+                                        get: { videoViewerURL != nil },
+                                        set: { if !$0 { videoViewerURL = nil; tappedVideoID = nil } }
+                                    )) {
+                                        if let url = videoViewerURL, let sourceID = tappedVideoID {
+                                            VideoViewer(videoURL: url)
+                                                .navigationTransition(.zoom(sourceID: sourceID, in: pickerNamespace))
+                                        }
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                            }
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Notes:")
+                            Text(contributionNotes)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                        
+                    }
+                }
+                .listStyle(.insetGrouped)
+                .scrollDismissesKeyboard(.interactively)
+                .scrollContentBackground(.hidden)
+                .navigationTitle("Untitled")
+            }
+            .padding(.top, 15)
+            
+            
+            HStack {
+                Menu {
                     Menu {
-                        Menu {
-                            Button {
-                                contributionManager.duplicateContribution(contribution: contribution, duplicateDate: false, user: user)
-                            } label: {
-                                Label("Today's date", systemImage: "calendar")
-                            }
-                            
-                            Button {
-                                contributionManager.duplicateContribution(contribution: contribution, duplicateDate: true, user: user)
-                            } label: {
-                                Label("Keep original", systemImage: "calendar.badge.clock")
-                            }
-                            
+                        Button {
+                            contributionManager.duplicateContribution(contribution: contribution, duplicateDate: false, user: user)
                         } label: {
-                            Label("Duplicate", systemImage: "document.on.document")
+                            Label("Today's date", systemImage: "calendar")
                         }
                         
                         Button {
-                           contributionToEdit = contribution
-                            dismiss()
+                            contributionManager.duplicateContribution(contribution: contribution, duplicateDate: true, user: user)
                         } label: {
-                            Label("Edit", systemImage: "pencil")
+                            Label("Keep original", systemImage: "calendar.badge.clock")
                         }
                         
-                        Button(role: .destructive) {
-                            contributionManager.deleteContribution(contribution: contribution)
-                            dismiss()
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
                     } label: {
-                        Image(systemName: "ellipsis")
-                            .font(.system(size: 26))
-                            .foregroundStyle(.white)
-                            .frame(width: 50, height: 50)
-                            .glassEffect(.clear.interactive())
+                        Label("Duplicate", systemImage: "document.on.document")
                     }
                     
-                    Spacer()
-                    Image(systemName: "checkmark")
+                    Button {
+                       contributionToEdit = contribution
+                        dismiss()
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    
+                    Button(role: .destructive) {
+                        contributionManager.deleteContribution(contribution: contribution)
+                        dismiss()
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
                         .font(.system(size: 26))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .frame(width: 50, height: 50)
-                        .glassEffect(.clear.interactive().tint(.blue))
-                        .onTapGesture {
-                            dismiss()
-                        }
-                }
-
-                Text(contribution.title ?? "Unnamed Contribution")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .lineLimit(nil)
-                    .padding(.vertical, 20)
-                
-                
-                HStack(spacing: 2) {
-                    Text("Type: \(contribution.type ?? "Error")")
-                }
-                .padding(.top, -10)
-                
-                
-                HStack {
-                    Text("Date: \(contributionDate, format: .dateTime.day(.twoDigits).month(.twoDigits).year())")
-
+                        .glassEffect(.clear.interactive())
                 }
                 
-                Text("Photos & Videos")
-                    .font(.system(size: 24).bold())
-                
-                if contributionMedia.count == 0 {
-                    Text("No photos or videos")
-                } else {
-                    MediaPickerRow(contributionMedia: $contributionMedia,
-                                   selectedItems: $selectedItems,
-                                   contributionManager: contributionManager,
-                                   onImageTap: { index, image in photoViewerImage = image; tappedPhotoID = "photo-\(index)"},
-                                   onVideoTap: { index, url in videoViewerURL = url; tappedVideoID = "video-\(index)"},
-                                   pickerNamespace: pickerNamespace,
-                                   showPicker: false)
-                    .onChange(of: selectedItems) { oldItems, newItems in
-                        contributionMedia.removeAll()
-                        
-                        for item in newItems {
-                            contributionManager.handlePickerItem(item: item, contributionMedia: $contributionMedia)
-                        }
+                Spacer()
+                Image(systemName: "checkmark")
+                    .font(.system(size: 26))
+                    .foregroundColor(.white)
+                    .frame(width: 50, height: 50)
+                    .glassEffect(.clear.interactive().tint(.blue))
+                    .onTapGesture {
+                        dismiss()
                     }
-                    .sheet(isPresented: Binding(
-                        get: { photoViewerImage != nil },
-                        set: { if !$0 { photoViewerImage = nil; tappedPhotoID = nil } }
-                    )) {
-                        if let image = photoViewerImage, let sourceID = tappedPhotoID {
-                            PhotoViewer(image: image)
-                                .navigationTransition(.zoom(sourceID: sourceID, in: pickerNamespace))
-                        }
-                    }
-                    .sheet(isPresented: Binding(
-                        get: { videoViewerURL != nil },
-                        set: { if !$0 { videoViewerURL = nil; tappedVideoID = nil } }
-                    )) {
-                        if let url = videoViewerURL, let sourceID = tappedVideoID {
-                            VideoViewer(videoURL: url)
-                                .navigationTransition(.zoom(sourceID: sourceID, in: pickerNamespace))
-                        }
-                    }
-
-                }
-                
-                
-                Text("Notes:")
-                
-                Text(contributionNotes)
-                
-                
             }
             .frame(maxHeight: .infinity, alignment: .top)
-            .padding(30)
-            .ignoresSafeArea(.keyboard)
+            .padding(20)
+
         }
         .ignoresSafeArea(.keyboard)
         .onAppear {
