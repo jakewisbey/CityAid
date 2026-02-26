@@ -39,8 +39,6 @@ struct HomeView: View{
             
             ForEach(Array(stars.values), id: \.id) { star in
                 StarView(star: star, namespaceID: starNamespace) {
-                    if let contribution = contributions.first(where: { stars[$0.objectID]?.id == star.id }) {
-                    }
                 }
             }
 

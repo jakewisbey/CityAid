@@ -115,7 +115,7 @@ class ContributionManager {
         
         
         if contributionTitle.isEmpty {
-            contribution.title = "Unnamed Contribution"
+            contribution.title = "Untitled Contribution"
         } else {
             contribution.title = contributionTitle
         }
@@ -149,7 +149,7 @@ class ContributionManager {
         }
         
         AudioServicesPlaySystemSound(1125)
-        HapticsManager.shared.vibrate(type: .success)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
 
         // convert to data and store
         do {
@@ -182,7 +182,12 @@ class ContributionManager {
     
      
     func editContribution(contribution: ContributionEntity, contributionTitle: String, contributionDate: Date, contributionMedia: [MediaItem], selectedType: TypeOfContribution, contributionNotes: String) {
-        contribution.title = contributionTitle
+        if contributionTitle.isEmpty {
+            contribution.title = "Untitled Contribution"
+        } else {
+            contribution.title = contributionTitle
+        }
+        
         contribution.date = contributionDate
         contribution.type = selectedType.rawValue
         if contributionNotes.isEmpty {
@@ -211,7 +216,7 @@ class ContributionManager {
         }
         
         AudioServicesPlaySystemSound(1125)
-        HapticsManager.shared.vibrate(type: .success)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
 
         
         // convert to data and store
@@ -297,8 +302,8 @@ class ContributionManager {
         context.delete(contribution)
         
         AudioServicesPlaySystemSound(1126)
-        HapticsManager.shared.vibrate(type: .warning)
-        
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+
         do {
             try context.save()
         } catch let error as NSError {

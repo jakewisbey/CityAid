@@ -173,48 +173,6 @@ struct AccountView: View {
     
 }
 
-struct CreditsView: View {
-    var body: some View {
-        List {
-            Section(
-                header: Text("Credits")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white.opacity(0.5)),
-                footer: Text("Credits for all icons used.")
-            ) {
-                HStack {
-                    Image("CleanlinessIcon")
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                }
-                HStack {
-                    Image("PlantcareIcon")
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                    Spacer()
-                    Text("Adobe")
-                }
-                HStack {
-                    Image("KindnessIcon")
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                    Spacer()
-                    Link("Succo Design @ SoftIcons.com", destination: URL(string: "https://www.softicons.com/holidays-icons/valentines-day-icons-by-succo-design/heart-icon")!)
-                }
-                HStack {
-                    Image("DonationIcon")
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                    Spacer()
-                    Link("Photo3idea @ Flaticon", destination: URL(string: "https://www.flaticon.com/free-icons/gift-box")!)
-                }
-            }
-        }
-    }
-}
-
-
-
 #Preview {
     AccountView()
         .environmentObject(UserData())

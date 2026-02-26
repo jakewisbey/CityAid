@@ -152,10 +152,9 @@ struct ViewContributionSheet: View {
                         
                     }
                 }
-                .listStyle(.insetGrouped)
                 .scrollDismissesKeyboard(.interactively)
-                .scrollContentBackground(.hidden)
-                .navigationTitle("Untitled")
+                .navigationTitle(contributionTitle)
+                .navigationBarTitleDisplayMode(.inline)
             }
             .padding(.top, 15)
             
@@ -226,9 +225,6 @@ struct ViewContributionSheet: View {
         }
     }
 }
-
-
-
 
 #Preview {
     let container = PreviewPersistenceController.shared

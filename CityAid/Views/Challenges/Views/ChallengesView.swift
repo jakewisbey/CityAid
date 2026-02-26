@@ -475,29 +475,29 @@ struct TotalContributionMilestone: Identifiable {
 }
 
 let levelMilestones: [LevelMilestone] = [
-    LevelMilestone(level: 2, title: "Baby Contributor", description: "Reach level 2", badgePath: "Bronze1Badge"),
-    LevelMilestone(level: 5, title: "Rookie Contributor", description: "Reach level 5", badgePath: "Bronze2Badge"),
-    LevelMilestone(level: 10, title: "Rising Contributor", description: "Reach level 10", badgePath: "Silver1Badge"),
-    LevelMilestone(level: 15, title: "Solid Contributor", description: "Reach level 15", badgePath: "Silver2Badge"),
-    LevelMilestone(level: 20, title: "Dedicated Contributor", description: "Reach level 20", badgePath: "Gold1Badge"),
-    LevelMilestone(level: 30, title: "Contributor Connoisseur", description: "Reach level 30", badgePath: "Gold2Badge"),
-    LevelMilestone(level: 50, title: "Legendary Contributor", description: "Reach level 50", badgePath: "Champion1Badge"),
-    LevelMilestone(level: 75, title: "Elite Contributor", description: "Reach level 75", badgePath: "Champion2Badge"),
-    LevelMilestone(level: 100, title: "Ultimate Contributor", description: "Reach level 100", badgePath: "SuperiorBadge")
+    LevelMilestone(level: 2, title: "Beginner Contributor", description: "Reach level 2", badgePath: "Bronze1Badge"),
+    LevelMilestone(level: 5, title: "Novice Contributor", description: "Reach level 5", badgePath: "Bronze2Badge"),
+    LevelMilestone(level: 10, title: "Intermediate Contributor", description: "Reach level 10", badgePath: "Silver1Badge"),
+    LevelMilestone(level: 15, title: "Advanced Contributor", description: "Reach level 15", badgePath: "Silver2Badge"),
+    LevelMilestone(level: 20, title: "Skilled Contributor", description: "Reach level 20", badgePath: "Gold1Badge"),
+    LevelMilestone(level: 30, title: "Expert Contributor", description: "Reach level 30", badgePath: "Gold2Badge"),
+    LevelMilestone(level: 50, title: "Master Contributor", description: "Reach level 50", badgePath: "Champion1Badge"),
+    LevelMilestone(level: 75, title: "Veteran Contributor", description: "Reach level 75", badgePath: "Champion2Badge"),
+    LevelMilestone(level: 100, title: "Elite Contributor", description: "Reach level 100", badgePath: "SuperiorBadge")
 ]
 
 
 
 let totalContributionMilestones: [TotalContributionMilestone] = [
-    TotalContributionMilestone(amount: 1, title: "A New Beginning", description: "Log your first contribution", xp: 2),
-    TotalContributionMilestone(amount: 5, title: "Handy Helper", description: "Log 5 contributions", xp: 5),
-    TotalContributionMilestone(amount: 10, title: "Community Cleaner", description: "Log 10 contributions", xp: 5),
-    TotalContributionMilestone(amount: 25, title: "Litter-picking Lion", description: "Log 25 contributions", xp: 5),
-    TotalContributionMilestone(amount: 50, title: "Garden Guardian", description: "Log 50 contributions", xp: 10),
-    TotalContributionMilestone(amount: 75, title: "Citywide Custodian", description: "Log 75 contributions", xp: 10),
-    TotalContributionMilestone(amount: 100, title: "Local Legend", description: "Log 100 contributions", xp: 10),
-    TotalContributionMilestone(amount: 150, title: "Urban Uplifter", description: "Log 150 contributions", xp: 15),
-    TotalContributionMilestone(amount: 200, title: "City Saviour ", description: "Log 200 contributions", xp: 15),
+    TotalContributionMilestone(amount: 1, title: "First Contribution", description: "Log your first contribution", xp: 2),
+    TotalContributionMilestone(amount: 5, title: "Getting Started", description: "Log 5 contributions", xp: 5),
+    TotalContributionMilestone(amount: 10, title: "Making Progress", description: "Log 10 contributions", xp: 5),
+    TotalContributionMilestone(amount: 25, title: "Consistent Contributor", description: "Log 25 contributions", xp: 5),
+    TotalContributionMilestone(amount: 50, title: "Active Member", description: "Log 50 contributions", xp: 10),
+    TotalContributionMilestone(amount: 75, title: "Trusted Contributor", description: "Log 75 contributions", xp: 10),
+    TotalContributionMilestone(amount: 100, title: "Dedicated Contributor", description: "Log 100 contributions", xp: 10),
+    TotalContributionMilestone(amount: 150, title: "Impact maker", description: "Log 150 contributions", xp: 15),
+    TotalContributionMilestone(amount: 200, title: "City Saviour", description: "Log 200 contributions", xp: 15),
 ]
 
 struct ChallengesView_Previews: PreviewProvider {

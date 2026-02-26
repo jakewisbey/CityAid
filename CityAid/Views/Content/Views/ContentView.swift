@@ -49,7 +49,7 @@ struct ContentView: View {
     // Values tab
     @State private var selectedTab: Tab = .home
     @State private var valuesTabActive: Bool = false
-    
+    @State private var screenWidth: CGFloat = 0
     
     // Time management
     var challengeManager: ChallengeManager {
@@ -102,6 +102,12 @@ struct ContentView: View {
                 .animation(.easeOut(duration: 0.25), value: backgroundMode)
             
             GeometryReader { geo in
+                Color.clear
+                    .frame(width: 0, height: 0)
+                    .onAppear { screenWidth = geo.size.width }
+                    .onChange(of: geo.size) { _, newSize in
+                        screenWidth = newSize.width
+                    }
                 RadialGradient(
                     gradient: Gradient(colors: [.black.opacity(0.8), .black.opacity(0.6), .black.opacity(0)]),
                     center: .center,
@@ -489,7 +495,7 @@ struct ContentView: View {
             DragGesture(minimumDistance: 50)
                 .onEnded { value in
                     // swipe from right to left
-                    if value.startLocation.x > UIScreen.main.bounds.width * 0.9 &&
+                    if value.startLocation.x > screenWidth * 0.9 &&
                         value.translation.width < -50 && !popped && !isExpanded && selectedTab == .home {
                         quickLogIsExpanded = true
                         backgroundMode = .quickLog
@@ -589,3 +595,4 @@ struct PreviewPersistenceController {
             PreviewPersistenceController.shared.viewContext
         )
 }
+
