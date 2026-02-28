@@ -77,12 +77,6 @@ class ContributionManager {
             }
         }
     }
-
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        DispatchQueue.main.async {
-            textField.selectedTextRange = textField.textRange(from: textField.beginningOfDocument, to: textField.endOfDocument)
-        }
-    }
     
     // Source - https://stackoverflow.com/a/40987452
     // Posted by David Seek, modified by community. See post 'Timeline' for change history

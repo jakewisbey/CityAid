@@ -103,12 +103,15 @@ class ChallengeManager {
             
         case .weekly:
             // same here as above but for weekly
-            let monday = cal.nextDate(
+            guard let monday = cal.nextDate(
                 after: date,
                 matching: DateComponents(hour: 0, minute: 0, weekday: 2),
                 matchingPolicy: .nextTime,
                 direction: .backward
-            )!
+            ) else {
+                return (0, false)
+            }
+            
             let startDate = cal.startOfDay(for: monday)
             let endDate = cal.date(byAdding: .day, value: 7, to: startDate)!
             var acceptedContributions = contributions.filter { ($0.date ?? .distantPast) >= startDate && ($0.date ?? .distantPast) < endDate }

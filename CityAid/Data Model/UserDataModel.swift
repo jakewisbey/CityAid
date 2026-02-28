@@ -44,7 +44,7 @@ class UserData: ObservableObject {
             "Gave up my seat": 0,
             "Cleared plant area": 0,
             "Helped with directions": 0,
-            "Took someone's trash": 0,
+            "Took someone's rubbish": 0,
             "Helped an animal": 0,
             "Held a door open": 0
         ]

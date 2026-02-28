@@ -115,7 +115,7 @@ struct ChallengesView: View {
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Weekly Challenges")
                                         .font(.system(size: 26, weight: .bold))
-                                    Text("Weekly challenges are harder, but more rewarding than daily challenges, designed to encourage you to contribute to your community even more.\n\nTry to complete all 3 each week to earn extra xp!")
+                                    Text("Weekly challenges are harder but more rewarding than daily challenges, designed to encourage you to contribute even more to your community.\n\nTry to complete all 3 each week to earn extra xp!")
                                 }
                                 .presentationCompactAdaptation(horizontal: .popover, vertical: .sheet)
                                 .padding()

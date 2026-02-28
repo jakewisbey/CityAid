@@ -9,7 +9,7 @@ struct InfoSheet: View {
         case .cleanliness:
             return .init(imageAddress: "CleanlinessBg",
                          title: "Cleanliness",
-                         caption: "Clean our streets of litter and polution.",
+                         caption: "Clean our streets of litter and pollution.",
                          cityEffects: ["62% of people in England drop litter", "Nine billion tonnes of litter ends up in our oceans across the planet each year", "Cleaning up litter from UK streets costs British taxpayers £500 million every year"],
                          mainInfo: "By helping clean up local streets and parks, you make your community safer, more welcoming, and healthier. Every piece of litter removed or area tidied encourages others to care for their surroundings to produce a lasting effect of change and sustainability.",
                          contributionOptions: ["Pick up litter", "Report damaged/vandalised areas to your local council", "Support local recycling programs"]

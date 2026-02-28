@@ -193,11 +193,11 @@ struct ContentView: View {
                                            buttons: buttons)
                             
                             QuickLogBubble(
-                                           title: "Took someone's trash",
+                                           title: "Took someone's rubbish",
                                            type: .cleanliness,
                                            originXCoord: geo.size.width * 1.2,
                                            originYCoord: geo.size.height * 0.55,
-                                           xCoord: geo.size.width * 0.60,
+                                           xCoord: geo.size.width * 0.58,
                                            yCoord: geo.size.height * 0.57,
                                            iconName: "bubbles.and.sparkles",
                                            delay: 0.05,
