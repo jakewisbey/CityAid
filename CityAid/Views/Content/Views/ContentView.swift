@@ -474,6 +474,8 @@ struct ContentView: View {
         )
         .onAppear {
             showOnboarding = !user.hasOpenedBefore
+            challengeManager.handleDailyReset()
+            challengeManager.handleWeeklyReset()
         }
         .onReceive(
             NotificationCenter.default.publisher(
